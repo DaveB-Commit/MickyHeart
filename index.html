@@ -11,6 +11,9 @@
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
   <style>
     html, body { height: 100%; margin: 0; }
     * { box-sizing: border-box; }
@@ -327,6 +330,26 @@
   </div>
 
   <script>
+    // ==========================================
+    // 🔥 FIREBASE LIVE CONFIGURATION
+    // ==========================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyAqeCjPBG2hjdV92ixJU56RC1yLhoYOdBE",
+      authDomain: "mickyheart-collection.firebaseapp.com",
+      databaseURL: "https://mickyheart-collection-default-rtdb.firebaseio.com",
+      projectId: "mickyheart-collection",
+      storageBucket: "mickyheart-collection.firebasestorage.app",
+      messagingSenderId: "306385073293",
+      appId: "1:306385073293:web:ae7d2a021d8d03165fdec4",
+      measurementId: "G-C33Y2RJYCZ"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    // ==========================================
+
+
     // --- PWA SETUP (Make the app installable) ---
     const logoUrl = "YOUR_LOGO_URL_HERE"; 
     const fallbackLogoUrl = "https://img.icons8.com/color/192/000000/hearts.png";
@@ -391,7 +414,7 @@
       women: "Ladies Wear.jpg",
       ladysbags: "Ladies Bags.jpg",
       men: "Gents Wear.jpg",
-      bedspread: "Bedspreads.png",
+      bedspread: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&q=80",
       towels: "Towels.jpg",
       poloshirts: "Polo Shirts.jpg"
     };
@@ -412,54 +435,66 @@
       poloshirts: { title: "Polo Shirts", items: [createDummyItem("Classic Pique Polo", 130, 'poloshirts')] }
     };
 
-    // --- INDEXED DB ENGINE ---
-    const dbName = 'MickyHeartDB';
-    const storeName = 'store';
 
-    function openDB() {
+    // --- OLD INDEXED DB READER (For Migration Only) ---
+    function readOldIndexedDB() {
       return new Promise((resolve, reject) => {
-        const request = indexedDB.open(dbName, 1);
-        request.onupgradeneeded = (e) => { e.target.result.createObjectStore(storeName); };
-        request.onsuccess = (e) => resolve(e.target.result);
-        request.onerror = (e) => reject(e.target.error);
+        const request = indexedDB.open('MickyHeartDB', 1);
+        request.onsuccess = (e) => {
+          try {
+              const db = e.target.result;
+              const tx = db.transaction('store', 'readonly');
+              const store = tx.objectStore('store');
+              const req = store.get('categoriesData');
+              req.onsuccess = () => resolve(req.result);
+              req.onerror = () => resolve(null);
+          } catch(err) {
+              resolve(null);
+          }
+        };
+        request.onerror = () => resolve(null);
       });
     }
 
+    // --- FIREBASE DATABASE ENGINE ---
     async function loadDataFromDB() {
-      const db = await openDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(storeName, 'readonly');
-        const store = tx.objectStore(storeName);
-        const request = store.get('categoriesData');
-        request.onsuccess = () => {
-          if (request.result) {
-            resolve(request.result);
-          } else {
-            // MIGRATION SCRIPT: Check if user has old localStorage data
-            const oldDataStr = localStorage.getItem('mickyheart_db');
-            if (oldDataStr) {
-                console.log("Migrating old localStorage data to IndexedDB...");
-                const oldData = JSON.parse(oldDataStr);
-                saveDataToDB(oldData).then(() => resolve(oldData));
-            } else {
-                saveDataToDB(defaultCategoriesData).then(() => resolve(defaultCategoriesData));
+      try {
+        const snapshot = await database.ref('store/categoriesData').once('value');
+        const data = snapshot.val();
+        
+        if (data) {
+            console.log("Data loaded from Firebase!");
+            return data;
+        } else {
+            console.log("No Firebase data found. Attempting to migrate old data...");
+            // MIGRATION SCRIPT: Check IndexedDB first, then localStorage
+            let oldData = await readOldIndexedDB();
+            if(!oldData) {
+                const oldLocalStr = localStorage.getItem('mickyheart_db');
+                if (oldLocalStr) oldData = JSON.parse(oldLocalStr);
             }
-          }
-        };
-        request.onerror = () => reject(request.error);
-      });
+
+            const finalDataToUse = oldData || defaultCategoriesData;
+            await saveDataToDB(finalDataToUse); // Push to Firebase
+            return finalDataToUse;
+        }
+      } catch (error) {
+        console.error("Firebase connection error! Are your config keys correct?", error);
+        alert("Warning: Could not connect to database. Displaying default offline data.");
+        return defaultCategoriesData;
+      }
     }
 
     async function saveDataToDB(data) {
-      const db = await openDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(storeName, 'readwrite');
-        const store = tx.objectStore(storeName);
-        store.put(data, 'categoriesData');
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject();
-      });
+      try {
+        await database.ref('store/categoriesData').set(data);
+        console.log("Successfully saved to Firebase!");
+      } catch(error) {
+        console.error("Failed to save to Firebase:", error);
+        alert("Failed to save data. Please check your Firebase permissions/rules.");
+      }
     }
+
 
     // --- INITIALIZATION ---
     async function initApp() {
@@ -474,6 +509,9 @@
             if (cat === 'women' && categoriesData[cat].title !== "Ladies Wear") { categoriesData[cat].title = "Ladies Wear"; needsUpdate = true; }
             if (cat === 'ladysbags' && categoriesData[cat].title !== "Ladies Bags") { categoriesData[cat].title = "Ladies Bags"; needsUpdate = true; }
             if (cat === 'men' && categoriesData[cat].title !== "Gents Wear") { categoriesData[cat].title = "Gents Wear"; needsUpdate = true; }
+
+            // Ensure categories map exactly to array structures in Firebase (Firebase sometimes drops empty arrays)
+            if(!categoriesData[cat].items) categoriesData[cat].items = [];
 
             categoriesData[cat].items.forEach(item => {
                 if(!item.description) { item.description = defaultDesc; needsUpdate = true; }
@@ -497,9 +535,11 @@
     function buildGlobalProductList() {
         allProducts = [];
         Object.keys(categoriesData).forEach(catKey => {
-            categoriesData[catKey].items.forEach((item, index) => {
-                allProducts.push({ ...item, categoryKey: catKey, index: index });
-            });
+            if(categoriesData[catKey].items) {
+              categoriesData[catKey].items.forEach((item, index) => {
+                  allProducts.push({ ...item, categoryKey: catKey, index: index });
+              });
+            }
         });
     }
 
@@ -508,10 +548,11 @@
         buildGlobalProductList();
     }
 
+
     // --- UI LOGIC ---
     function openCategoryModal(key) {
       const data = categoriesData[key];
-      if (!data || data.items.length === 0) return alert("No products here yet!");
+      if (!data || !data.items || data.items.length === 0) return alert("No products here yet!");
       
       document.getElementById('modal-title').textContent = data.title;
       let html = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">';
@@ -968,6 +1009,7 @@
           categoriesData[catKey].items.push(newProduct);
         }
       } else {
+        if(!categoriesData[catKey].items) categoriesData[catKey].items = [];
         categoriesData[catKey].items.push(newProduct);
       }
 
