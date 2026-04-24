@@ -1,0 +1,992 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MickyHeart Collection</title>
+  
+  <link rel="icon" type="image/png" id="site-favicon" href="YOUR_LOGO_URL_HERE">
+  
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    html, body { height: 100%; margin: 0; }
+    * { box-sizing: border-box; }
+    .font-display { font-family: 'Playfair Display', Georgia, serif; }
+    .font-body { font-family: 'DM Sans', sans-serif; }
+
+    .sidebar { width: 260px; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+    .sidebar.closed { transform: translateX(-100%); }
+
+    .modal-overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal-content { transform: translateY(30px) scale(0.96); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+    .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
+
+    .nav-item { position: relative; overflow: hidden; transition: all 0.25s ease; }
+    .nav-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #22c55e; transform: scaleY(0); transition: transform 0.25s ease; }
+    .nav-item:hover::before { transform: scaleY(1); }
+    .nav-item:hover { background: rgba(34,197,94,0.08); }
+
+    .product-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .product-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+    .img-zoom { transition: transform 0.5s ease; }
+    .group:hover .img-zoom { transform: scale(1.08); }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: fadeInUp 0.5s ease forwards; }
+  </style>
+ </head>
+ <body class="h-full font-body" style="background:#ffffff; color:#1a1a1a;">
+  <div id="app-wrapper" class="h-full w-full flex overflow-auto relative">
+    
+   <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full z-40 flex flex-col" style="background:#22c55e; color:#ffffff;">
+    <div class="p-6 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,0.2);">
+     <div class="flex items-center gap-3">
+      <img src="YOUR_LOGO_URL_HERE" alt="Logo" class="w-9 h-9 rounded-full bg-white object-cover border-2 border-white shadow-sm" onerror="this.src='https://img.icons8.com/color/96/000000/hearts.png'">
+      <div>
+       <div class="font-display text-lg font-bold" style="color:#ffffff;">MickyHeart</div>
+       <div class="text-[10px] mt-0.5 tracking-widest uppercase" style="color:rgba(255,255,255,0.8);">Collection</div>
+      </div>
+     </div>
+     <button id="close-sidebar" class="p-1 rounded hover:bg-white/10 transition lg:hidden"><i data-lucide="x" style="width:20px;height:20px;color:rgba(255,255,255,0.7);"></i></button>
+    </div>
+    <nav class="flex-1 py-4 overflow-y-auto">
+     <div class="px-5 py-2 text-[10px] tracking-[3px] uppercase" style="color:rgba(255,255,255,0.5);">Apparel & Accessories</div>
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('kids')"> <i data-lucide="baby" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Kids Wear</span> </button> 
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('women')"> <i data-lucide="flower-2" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Ladies Wear</span> </button> 
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('ladysbags')"> <i data-lucide="shopping-bag" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Ladies Bags</span> </button> 
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('men')"> <i data-lucide="shirt" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Gents Wear</span> </button>
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('poloshirts')"> <i data-lucide="shirt" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Polo Shirts</span> </button>
+     
+     <div class="px-5 py-2 mt-4 text-[10px] tracking-[3px] uppercase" style="color:rgba(255,255,255,0.5);">Home & More</div>
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('bedspread')"> <i data-lucide="bed-double" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Bedspreads</span> </button> 
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('towels')"> <i data-lucide="droplets" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Towels</span> </button> 
+    </nav>
+    <div class="p-5 text-center" style="border-top:1px solid rgba(255,255,255,0.2);">
+     <button id="install-app-btn" onclick="installApp()" class="hidden w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-bold text-green-600 bg-white hover:bg-gray-100 transition shadow-lg mb-3">
+        <i data-lucide="download" class="w-4 h-4"></i> Install App
+     </button>
+
+     <button onclick="openWhatsApp()" class="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-semibold text-white transition hover:bg-white/30 mb-4 shadow-sm" style="background:rgba(255,255,255,0.2);"> <i data-lucide="message-circle" style="width:18px;height:18px;"></i> Chat with Us </button>
+     <div class="text-xs mb-3" style="color:rgba(255,255,255,0.9);">
+       <p class="font-semibold mb-1">053 924 8634 / 024 805 8689</p>
+       <p class="text-[11px] opacity-80">Koforidua Nkurakan<br>Eastern Region, Ghana</p>
+     </div>
+     <button onclick="openAdmin()" class="mt-2 flex items-center justify-center gap-1 w-full py-2 text-[11px] font-bold uppercase tracking-wider bg-black/20 hover:bg-black/40 rounded-lg transition"><i data-lucide="settings" class="w-3 h-3"></i> Admin</button>
+    </div>
+   </aside>
+
+   <div id="main-content" class="flex-1 min-h-full transition-all duration-300 flex flex-col" style="margin-left:260px;">
+    
+    <header class="sticky top-0 z-30 flex flex-col w-full backdrop-blur-md shadow-sm" style="background:rgba(255,255,255,0.95);">
+     
+     <div class="w-full bg-green-600 text-white px-6 py-2 flex items-center justify-between text-xs font-semibold tracking-wide border-b border-green-700">
+      <div class="flex items-center gap-4 lg:gap-6">
+       <a href="tel:+233539248634" class="flex items-center gap-1.5 hover:text-green-200 transition">
+        <i data-lucide="phone-call" class="w-3.5 h-3.5"></i> 
+        <span class="hidden sm:inline">Call us: </span>053 924 8634 / 024 805 8689
+       </a>
+       <span class="hidden md:flex items-center gap-1.5 opacity-90">
+        <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Koforidua Nkurakan, Ghana
+       </span>
+      </div>
+      <button onclick="openWhatsApp()" class="flex items-center gap-1.5 hover:text-green-200 transition">
+        <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> WhatsApp Support
+      </button>
+     </div>
+
+     <div class="flex items-center justify-between px-6 py-4 border-b" style="border-color:rgba(34,197,94,0.2);">
+      
+      <div class="flex items-center gap-3">
+       <button id="open-sidebar" class="p-2 -ml-2 rounded-lg hover:bg-black/5 transition hidden"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
+       <div class="flex items-center gap-2">
+        <img src="YOUR_LOGO_URL_HERE" alt="Logo" class="w-7 h-7 object-cover rounded-full shadow-sm" onerror="this.src='https://img.icons8.com/color/96/000000/hearts.png'">
+        <div id="topbar-brand" class="font-display text-lg font-semibold" style="color:#22c55e;">MickyHeart Collection</div>
+       </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+       <div class="hidden md:flex items-center px-3 py-2 rounded-lg" style="background:#f0f0f0; border:1px solid #e0e0e0;">
+         <i data-lucide="search" style="width:18px;height:18px;color:#999; margin-right:8px;"></i> 
+         <input type="text" id="search-input" placeholder="Search products..." class="bg-transparent outline-none text-sm w-48" style="color:#555;" onkeyup="handleSearch()">
+       </div>
+       <button class="p-2 rounded-lg hover:bg-black/5 transition md:hidden" onclick="toggleSearchBar()"><i data-lucide="search" style="width:20px;height:20px;color:#555;"></i></button> 
+       <button class="p-2 rounded-lg hover:bg-black/5 transition relative" onclick="openCart()"> 
+         <i data-lucide="shopping-bag" style="width:20px;height:20px;color:#555;"></i> 
+         <span id="cart-badge" class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center text-white" style="background:#22c55e;">0</span> 
+       </button>
+      </div>
+     </div>
+
+    </header>
+
+    <div class="flex-1">
+      <section class="relative px-8 py-24 md:py-32 flex flex-col items-center justify-center text-center overflow-hidden min-h-[60vh]">
+       <img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1600&q=80" class="absolute inset-0 w-full h-full object-cover">
+       <div class="absolute inset-0 bg-black/50"></div>
+       <div class="relative z-10 flex flex-col items-center">
+           <div class="animate-in"><span class="inline-block text-[10px] tracking-[5px] uppercase font-semibold px-4 py-1.5 rounded-full mb-6 backdrop-blur-md border border-white/30 text-white" style="background:rgba(255,255,255,0.1);">Season 2026</span></div>
+           <h1 id="hero-heading" class="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight max-w-3xl animate-in delay-1 text-white">Dress Bold. Live Bright.</h1>
+           <p id="hero-subtext" class="mt-5 text-base md:text-xl max-w-lg leading-relaxed animate-in delay-2 text-white/90">Curated fashion for every heartbeat — from playful kids styles to elegant pieces for him &amp; her.</p>
+           <div class="mt-8 flex gap-3 animate-in delay-3">
+              <button class="px-8 py-4 rounded-full text-sm font-semibold text-white transition hover:opacity-90 shadow-xl hover:scale-105" style="background:#22c55e;" onclick="openCategoryModal('women')">Explore New Collection</button> 
+           </div>
+       </div>
+      </section>
+
+      <section class="px-8 py-16">
+       <div class="text-center mb-10">
+        <h2 class="font-display text-2xl md:text-3xl font-bold">Shop by Category</h2>
+       </div>
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div class="product-card group relative h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('kids')"><img src="https://images.unsplash.com/photo-1519457431-7571f83810b4?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-6"><h3 class="font-display text-2xl font-bold text-white">Kids Wear</h3></div></div>
+        <div class="product-card group relative h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('women')"><img src="https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-6"><h3 class="font-display text-2xl font-bold text-white">Ladies Wear</h3></div></div>
+        <div class="product-card group relative h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('ladysbags')"><img src="https://images.unsplash.com/photo-1584916201218-f4242ceb4809?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-6"><h3 class="font-display text-2xl font-bold text-white">Ladies Bags</h3></div></div>
+        <div class="product-card group relative h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('men')"><img src="https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-6"><h3 class="font-display text-2xl font-bold text-white">Gents Wear</h3></div></div>
+        <div class="product-card group relative h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('bedspread')"><img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-6"><h3 class="font-display text-2xl font-bold text-white">Bedspreads</h3></div></div>
+        <div class="product-card group relative h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('poloshirts')"><img src="https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-6"><h3 class="font-display text-2xl font-bold text-white">Polo Shirts</h3></div></div>
+       </div>
+      </section>
+    </div>
+
+    <footer class="px-8 py-10 text-gray-500 border-t border-green-100 bg-white">
+     <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
+      
+      <div class="flex-1 w-full text-center md:text-left flex flex-col items-center md:items-start">
+       <div class="flex items-center gap-2 mb-2">
+         <img src="YOUR_LOGO_URL_HERE" alt="Logo" class="w-6 h-6 object-cover rounded-full" onerror="this.src='https://img.icons8.com/color/96/000000/hearts.png'">
+         <div class="font-display text-2xl font-bold text-green-600">MickyHeart</div>
+       </div>
+       <p class="text-sm opacity-80">Crafted with love — Fashion for every heartbeat.</p>
+      </div>
+
+      <div class="flex-1 w-full text-center">
+       <p class="text-sm font-medium text-gray-700 mb-1">Koforidua Nkurakan, Eastern Region, Ghana</p>
+       <p class="text-sm">Support: 0539248634 / 0248058689</p>
+      </div>
+
+      <div class="flex-1 w-full flex justify-center md:justify-end items-center gap-4">
+       <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-green-500 hover:text-white transition shadow-sm border border-gray-100" aria-label="Facebook">
+        <i data-lucide="facebook" class="w-5 h-5"></i>
+       </a>
+       <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-green-500 hover:text-white transition shadow-sm border border-gray-100" aria-label="TikTok">
+         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+           <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+         </svg>
+       </a>
+       <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-green-500 hover:text-white transition shadow-sm border border-gray-100" aria-label="Instagram">
+        <i data-lucide="instagram" class="w-5 h-5"></i>
+       </a>
+      </div>
+
+     </div>
+    </footer>
+   </div>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.6); backdrop-filter: blur(4px);" onclick="closeModal(event)">
+   <div class="modal-content w-full max-w-4xl max-h-[90%] overflow-auto rounded-3xl p-0 shadow-2xl bg-white" onclick="event.stopPropagation()">
+    <div id="modal-header" class="flex items-center justify-between p-6 sticky top-0 bg-white/95 backdrop-blur-md border-b border-gray-100 z-10">
+     <h2 id="modal-title" class="font-display text-2xl font-bold"></h2>
+     <button onclick="closeModal()" class="p-2 rounded-full hover:bg-gray-100 transition"><i data-lucide="x" class="w-6 h-6 text-gray-500"></i></button>
+    </div>
+    <div id="modal-body" class="p-6"></div>
+   </div>
+  </div>
+
+  <div id="admin-modal" class="modal-overlay fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80" onclick="closeAdmin(event)">
+   <div class="modal-content w-full max-w-6xl max-h-[95%] h-full flex flex-col rounded-3xl overflow-hidden shadow-2xl bg-white" onclick="event.stopPropagation()">
+    <div class="flex items-center justify-between p-6 bg-gray-900 text-white flex-shrink-0">
+     <div>
+       <h2 class="font-display text-2xl font-bold flex items-center gap-2"><i data-lucide="shield"></i> Admin Console</h2>
+       <p class="text-xs text-gray-400 mt-1">Manage products, descriptions, sizes, and images.</p>
+     </div>
+     <button onclick="closeAdmin()" class="p-2 rounded-full hover:bg-gray-800 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
+    </div>
+    
+    <div class="flex flex-1 overflow-hidden">
+      <div id="admin-sidebar" class="hidden w-64 bg-gray-50 border-r border-gray-200 p-4 flex-col gap-2 flex-shrink-0">
+        <button onclick="switchAdminTab('list')" id="tab-btn-list" class="flex items-center gap-3 px-4 py-3 rounded-lg font-bold text-sm bg-green-100 text-green-700 transition"><i data-lucide="list" class="w-5 h-5"></i> Product List</button>
+        <button onclick="switchAdminTab('add')" id="tab-btn-add" class="flex items-center gap-3 px-4 py-3 rounded-lg font-bold text-sm text-gray-600 hover:bg-gray-200 transition"><i data-lucide="plus-circle" class="w-5 h-5"></i> Add New Product</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-6 bg-white relative">
+        
+        <div id="admin-tab-login" class="flex items-center justify-center h-full animate-in">
+          <form onsubmit="handleAdminLogin(event)" class="w-full max-w-sm bg-white p-8 rounded-2xl border border-gray-200 text-center shadow-lg">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i data-lucide="lock" class="w-8 h-8 text-gray-500"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2 font-display">Admin Access</h3>
+            <p class="text-sm text-gray-500 mb-6">Please enter the password to continue.</p>
+            
+            <input type="password" id="admin-password-input" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 outline-none mb-3 text-center tracking-widest" placeholder="••••••••">
+            <p id="admin-login-error" class="text-red-500 text-sm mb-4 hidden font-bold">Incorrect password.</p>
+            
+            <button type="submit" class="w-full py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition shadow-md">Login</button>
+          </form>
+        </div>
+
+        <div id="admin-tab-list" class="hidden">
+          <h3 class="text-xl font-bold text-gray-800 mb-6">All Products</h3>
+          <div class="overflow-x-auto rounded-xl border border-gray-200">
+            <table class="w-full text-left border-collapse">
+              <thead><tr class="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs uppercase tracking-wider"><th class="p-4">Img</th><th class="p-4">Name</th><th class="p-4">Category</th><th class="p-4">Price</th><th class="p-4 text-right">Actions</th></tr></thead>
+              <tbody id="admin-product-table" class="divide-y divide-gray-100"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="admin-tab-add" class="hidden max-w-3xl mx-auto">
+          <h3 id="admin-form-title" class="text-2xl font-bold text-gray-800 mb-6">Add New Product</h3>
+          <form onsubmit="saveProduct(event)" class="space-y-6">
+            <input type="hidden" id="admin-edit-index" value="">
+            <input type="hidden" id="admin-edit-original-cat" value="">
+            
+            <div class="grid grid-cols-2 gap-6">
+              <div class="col-span-2 md:col-span-1">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Product Name *</label>
+                <input type="text" id="admin-prod-name" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 outline-none">
+              </div>
+              <div class="col-span-2 md:col-span-1">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Category *</label>
+                <select id="admin-prod-cat" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 outline-none bg-white">
+                  <option value="kids">Kids Wear</option>
+                  <option value="women">Ladies Wear</option>
+                  <option value="ladysbags">Ladies Bags</option>
+                  <option value="men">Gents Wear</option>
+                  <option value="poloshirts">Polo Shirts</option>
+                  <option value="bedspread">Bedspreads</option>
+                  <option value="towels">Towels</option>
+                </select>
+              </div>
+              <div class="col-span-2 md:col-span-1">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Price (₵) *</label>
+                <input type="number" step="0.01" id="admin-prod-price" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 outline-none">
+              </div>
+              <div class="col-span-2 md:col-span-1">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Available Sizes</label>
+                <input type="text" id="admin-prod-sizes" placeholder="e.g., S, M, L, XL" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 outline-none">
+              </div>
+              <div class="col-span-2">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Product Description</label>
+                <textarea id="admin-prod-desc" rows="3" placeholder="Describe the material, fit, and styling..." class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 outline-none"></textarea>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-200 pt-6">
+              <label class="block text-sm font-bold text-gray-700 mb-4">Product Images (Up to 3)</label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                
+                <div class="border border-gray-300 rounded-xl p-4 bg-gray-50 flex flex-col items-center">
+                  <span class="text-xs font-bold text-gray-500 mb-2">Main Image (Required)</span>
+                  <div class="w-full h-32 bg-white border border-gray-200 rounded-lg mb-3 flex items-center justify-center overflow-hidden relative">
+                    <img id="admin-preview-1" src="" class="w-full h-full object-cover hidden">
+                    <i id="admin-icon-1" data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                  </div>
+                  <input type="file" accept="image/*" onchange="compressAndPreview(event, 1)" class="w-full text-xs text-gray-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-green-100 file:text-green-700">
+                  <input type="hidden" id="admin-data-img-1" required>
+                </div>
+
+                <div class="border border-gray-300 rounded-xl p-4 bg-gray-50 flex flex-col items-center">
+                  <span class="text-xs font-bold text-gray-500 mb-2">Image 2 (Optional)</span>
+                  <div class="w-full h-32 bg-white border border-gray-200 rounded-lg mb-3 flex items-center justify-center overflow-hidden relative">
+                    <img id="admin-preview-2" src="" class="w-full h-full object-cover hidden">
+                    <i id="admin-icon-2" data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                  </div>
+                  <input type="file" accept="image/*" onchange="compressAndPreview(event, 2)" class="w-full text-xs text-gray-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-green-100 file:text-green-700">
+                  <input type="hidden" id="admin-data-img-2">
+                </div>
+
+                <div class="border border-gray-300 rounded-xl p-4 bg-gray-50 flex flex-col items-center">
+                  <span class="text-xs font-bold text-gray-500 mb-2">Image 3 (Optional)</span>
+                  <div class="w-full h-32 bg-white border border-gray-200 rounded-lg mb-3 flex items-center justify-center overflow-hidden relative">
+                    <img id="admin-preview-3" src="" class="w-full h-full object-cover hidden">
+                    <i id="admin-icon-3" data-lucide="image" class="w-6 h-6 text-gray-300"></i>
+                  </div>
+                  <input type="file" accept="image/*" onchange="compressAndPreview(event, 3)" class="w-full text-xs text-gray-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-green-100 file:text-green-700">
+                  <input type="hidden" id="admin-data-img-3">
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-6 border-t border-gray-200 flex justify-end gap-3">
+              <button type="button" onclick="switchAdminTab('list')" class="px-6 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition">Cancel</button>
+              <button type="submit" class="px-8 py-3 rounded-xl font-bold text-white bg-green-500 hover:bg-green-600 transition shadow-lg">Save Product</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+   </div>
+  </div>
+
+  <script>
+    // --- PWA SETUP (Make the app installable) ---
+    const logoUrl = "YOUR_LOGO_URL_HERE"; 
+    const fallbackLogoUrl = "https://img.icons8.com/color/192/000000/hearts.png";
+
+    const manifestJSON = {
+      name: "MickyHeart Collection",
+      short_name: "MickyHeart",
+      start_url: window.location.href,
+      display: "standalone",
+      background_color: "#ffffff",
+      theme_color: "#22c55e",
+      icons: [{ src: (logoUrl.includes("YOUR_LOGO") ? fallbackLogoUrl : logoUrl), sizes: "192x192", type: "image/png" }]
+    };
+    
+    // Inject Manifest dynamically
+    const manifestStr = encodeURIComponent(JSON.stringify(manifestJSON));
+    const manifestEl = document.createElement('link');
+    manifestEl.rel = 'manifest';
+    manifestEl.href = 'data:application/manifest+json;charset=utf-8,' + manifestStr;
+    document.head.appendChild(manifestEl);
+
+    // App Install Logic
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault(); 
+      deferredPrompt = e; 
+      const installBtn = document.getElementById('install-app-btn');
+      if(installBtn) installBtn.classList.remove('hidden'); 
+    });
+
+    function installApp() {
+      if (!deferredPrompt) {
+          alert("Your browser doesn't support direct installation right now, or the app is already installed! Try using your browser's 'Add to Home Screen' option.");
+          return;
+      }
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          document.getElementById('install-app-btn').classList.add('hidden');
+        }
+        deferredPrompt = null;
+      });
+    }
+
+    // --- GLOBALS ---
+    const WHATSAPP_NUMBER = '233539248634'; 
+    let cartItems = [];
+    let allProducts = [];
+    window.currentSelectedSize = null; 
+    let categoriesData = {}; 
+
+    // SECURITY SETTINGS
+    const ADMIN_PASSWORD = "admin123";
+    let isAdminAuthenticated = false;
+
+    const defaultDesc = "Experience premium quality and unmatched style. Carefully crafted with high-grade materials to ensure maximum durability and a perfect, comfortable fit for everyday use.";
+    const defaultSizes = "S, M, L, XL";
+    const defaultBedSizes = "Single Bed, Double Bed, King Size, Queen Size";
+
+    const catImages = {
+      kids: "https://images.unsplash.com/photo-1519457431-7571f83810b4?auto=format&fit=crop&w=400&q=80",
+      women: "https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?auto=format&fit=crop&w=400&q=80",
+      ladysbags: "https://images.unsplash.com/photo-1584916201218-f4242ceb4809?auto=format&fit=crop&w=400&q=80",
+      men: "https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?auto=format&fit=crop&w=400&q=80",
+      bedspread: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&q=80",
+      towels: "https://images.unsplash.com/photo-1583947581924-860bda6a26df?auto=format&fit=crop&w=400&q=80",
+      poloshirts: "https://images.unsplash.com/photo-1581655353564-df123a1eb820?auto=format&fit=crop&w=400&q=80"
+    };
+
+    function createDummyItem(name, price, imgKey) {
+        const img = catImages[imgKey];
+        const sizes = (imgKey === 'bedspread') ? defaultBedSizes : defaultSizes;
+        return { name, price, img, description: defaultDesc, sizes: sizes, images: [img, img, img] };
+    }
+
+    const defaultCategoriesData = {
+      kids: { title: "Kids Wear", items: [createDummyItem("Rainbow Play Suit", 120, 'kids'), createDummyItem("Denim Kids Jacket", 180, 'kids')] },
+      women: { title: "Ladies Wear", items: [createDummyItem("Silk Wrap Dress", 350, 'women'), createDummyItem("Pleated Midi Skirt", 220, 'women')] },
+      ladysbags: { title: "Ladies Bags", items: [createDummyItem("Leather Tote Bag", 450, 'ladysbags'), createDummyItem("Evening Clutch", 250, 'ladysbags')] },
+      men: { title: "Gents Wear", items: [createDummyItem("Classic Chinos", 180, 'men'), createDummyItem("Linen Button-Down", 210, 'men')] },
+      bedspread: { title: "Bedspreads", items: [createDummyItem("Luxury Quilt Set", 600, 'bedspread')] },
+      towels: { title: "Towels", items: [createDummyItem("Plush Bath Towel", 80, 'towels')] },
+      poloshirts: { title: "Polo Shirts", items: [createDummyItem("Classic Pique Polo", 130, 'poloshirts')] }
+    };
+
+    // --- INDEXED DB ENGINE ---
+    const dbName = 'MickyHeartDB';
+    const storeName = 'store';
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName, 1);
+        request.onupgradeneeded = (e) => { e.target.result.createObjectStore(storeName); };
+        request.onsuccess = (e) => resolve(e.target.result);
+        request.onerror = (e) => reject(e.target.error);
+      });
+    }
+
+    async function loadDataFromDB() {
+      const db = await openDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readonly');
+        const store = tx.objectStore(storeName);
+        const request = store.get('categoriesData');
+        request.onsuccess = () => {
+          if (request.result) {
+            resolve(request.result);
+          } else {
+            // MIGRATION SCRIPT: Check if user has old localStorage data
+            const oldDataStr = localStorage.getItem('mickyheart_db');
+            if (oldDataStr) {
+                console.log("Migrating old localStorage data to IndexedDB...");
+                const oldData = JSON.parse(oldDataStr);
+                saveDataToDB(oldData).then(() => resolve(oldData));
+            } else {
+                saveDataToDB(defaultCategoriesData).then(() => resolve(defaultCategoriesData));
+            }
+          }
+        };
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function saveDataToDB(data) {
+      const db = await openDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readwrite');
+        const store = tx.objectStore(storeName);
+        store.put(data, 'categoriesData');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject();
+      });
+    }
+
+    // --- INITIALIZATION ---
+    async function initApp() {
+        categoriesData = await loadDataFromDB();
+        
+        let needsUpdate = false;
+        
+        // Auto-upgrade structure and enforce new naming conventions
+        Object.keys(categoriesData).forEach(cat => {
+            
+            // Enforce updated category titles for existing DB records
+            if (cat === 'women' && categoriesData[cat].title !== "Ladies Wear") { categoriesData[cat].title = "Ladies Wear"; needsUpdate = true; }
+            if (cat === 'ladysbags' && categoriesData[cat].title !== "Ladies Bags") { categoriesData[cat].title = "Ladies Bags"; needsUpdate = true; }
+            if (cat === 'men' && categoriesData[cat].title !== "Gents Wear") { categoriesData[cat].title = "Gents Wear"; needsUpdate = true; }
+
+            categoriesData[cat].items.forEach(item => {
+                if(!item.description) { item.description = defaultDesc; needsUpdate = true; }
+                if(!item.sizes || (cat === 'bedspread' && item.sizes === defaultSizes)) {
+                    item.sizes = (cat === 'bedspread') ? defaultBedSizes : defaultSizes;
+                    needsUpdate = true;
+                }
+                if(!item.images || item.images.length === 0) { item.images = [item.img, item.img, item.img]; needsUpdate = true; }
+            });
+        });
+
+        if (needsUpdate) {
+            await persistData();
+        } else {
+            buildGlobalProductList();
+        }
+        
+        lucide.createIcons();
+    }
+
+    function buildGlobalProductList() {
+        allProducts = [];
+        Object.keys(categoriesData).forEach(catKey => {
+            categoriesData[catKey].items.forEach((item, index) => {
+                allProducts.push({ ...item, categoryKey: catKey, index: index });
+            });
+        });
+    }
+
+    async function persistData() {
+        await saveDataToDB(categoriesData);
+        buildGlobalProductList();
+    }
+
+    // --- UI LOGIC ---
+    function openCategoryModal(key) {
+      const data = categoriesData[key];
+      if (!data || data.items.length === 0) return alert("No products here yet!");
+      
+      document.getElementById('modal-title').textContent = data.title;
+      let html = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">';
+      
+      data.items.forEach((item, idx) => {
+        html += `
+          <div class="rounded-2xl overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer" style="background:#faf8f5; border:1px solid #eee;" onclick="openProductDetail('${key}', ${idx})">
+            <div class="h-56 overflow-hidden bg-gray-100 relative">
+              <img src="${item.img}" class="w-full h-full object-cover img-zoom">
+              <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center"><span class="bg-white px-4 py-2 rounded-full text-xs font-bold shadow">View Details</span></div>
+            </div>
+            <div class="p-5">
+              <h4 class="font-display font-bold text-gray-800 text-lg truncate">${item.name}</h4>
+              <p class="font-bold text-green-600 mt-2 text-lg">₵${parseFloat(item.price).toFixed(2)}</p>
+            </div>
+          </div>`;
+      });
+      html += '</div>';
+      document.getElementById('modal-body').innerHTML = html;
+      document.getElementById('modal-overlay').classList.add('active');
+    }
+
+    function openProductDetail(catKey, index) {
+        const item = categoriesData[catKey].items[index];
+        window.currentSelectedSize = null;
+
+        const sizeArray = item.sizes ? item.sizes.split(',').map(s => s.trim()).filter(s => s) : ['One Size'];
+        const sizeHtml = sizeArray.map(s => `<button type="button" onclick="selectSizeBtn(this, '${s}')" class="size-btn px-4 py-2 border-2 border-gray-200 rounded-lg font-bold text-gray-600 hover:border-green-500 transition">${s}</button>`).join('');
+
+        const validImages = item.images.filter(img => img && img.length > 10);
+        const galleryHtml = validImages.map((img, i) => `<img src="${img}" onclick="document.getElementById('main-detail-img').src='${img}'" class="w-20 h-20 object-cover rounded-xl border-2 border-transparent hover:border-green-500 cursor-pointer shadow-sm transition">`).join('');
+
+        document.getElementById('modal-title').textContent = "Product Details";
+        document.getElementById('modal-body').innerHTML = `
+          <div class="flex flex-col md:flex-row gap-10 animate-in">
+            <div class="w-full md:w-1/2 flex flex-col gap-4">
+              <div class="w-full h-96 bg-gray-100 rounded-3xl overflow-hidden shadow-inner border border-gray-200">
+                <img id="main-detail-img" src="${item.img}" class="w-full h-full object-cover">
+              </div>
+              <div class="flex gap-4 overflow-x-auto pb-2">${galleryHtml}</div>
+            </div>
+            <div class="w-full md:w-1/2 flex flex-col">
+              <button onclick="openCategoryModal('${catKey}')" class="self-start mb-6 text-sm font-bold text-gray-500 hover:text-green-600 transition flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to ${categoriesData[catKey].title}</button>
+              <h2 class="text-4xl font-display font-bold text-gray-900">${item.name}</h2>
+              <p class="text-3xl text-green-600 font-bold mt-3">₵${parseFloat(item.price).toFixed(2)}</p>
+              <div class="mt-8">
+                <h4 class="font-bold text-gray-800 mb-2 uppercase text-xs tracking-wider">Description</h4>
+                <p class="text-gray-600 leading-relaxed text-sm">${item.description}</p>
+              </div>
+              <div class="mt-8">
+                <h4 class="font-bold text-gray-800 mb-3 uppercase text-xs tracking-wider">Select Size <span id="size-warning" class="text-red-500 hidden ml-2 text-transform-none">*Please select a size</span></h4>
+                <div class="flex flex-wrap gap-3">${sizeHtml}</div>
+              </div>
+              <div class="mt-auto pt-10">
+                <button onclick="handleAddDetailToCart('${item.name}', ${item.price}, '${item.img}', ${sizeArray.length === 1 && sizeArray[0] === 'One Size'})" class="w-full bg-green-500 text-white font-bold py-4 rounded-2xl hover:bg-green-600 transition shadow-lg text-lg flex justify-center items-center gap-2"><i data-lucide="shopping-bag"></i> Add to Bag</button>
+              </div>
+            </div>
+          </div>
+        `;
+        lucide.createIcons();
+    }
+
+    function selectSizeBtn(btn, size) {
+        document.querySelectorAll('.size-btn').forEach(b => {
+            b.classList.remove('bg-green-500', 'text-white', 'border-green-500');
+            b.classList.add('text-gray-600', 'border-gray-200');
+        });
+        btn.classList.remove('text-gray-600', 'border-gray-200');
+        btn.classList.add('bg-green-500', 'text-white', 'border-green-500');
+        window.currentSelectedSize = size;
+        document.getElementById('size-warning').classList.add('hidden');
+    }
+
+    function handleAddDetailToCart(name, price, img, isOneSize) {
+        if (isOneSize) window.currentSelectedSize = 'One Size';
+        if (!window.currentSelectedSize) {
+            document.getElementById('size-warning').classList.remove('hidden');
+            return;
+        }
+        
+        const existingItem = cartItems.find(item => item.name === name && item.size === window.currentSelectedSize);
+        if (existingItem) {
+            existingItem.quantity++;
+        } else {
+            cartItems.push({ name: name, size: window.currentSelectedSize, price: parseFloat(price), img: img, quantity: 1 });
+        }
+        updateCartBadge();
+        showCartNotification(`${name} (${window.currentSelectedSize}) added!`);
+    }
+
+    function closeModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('modal-overlay').classList.remove('active');
+    }
+
+    function removeFromCart(index) {
+      cartItems.splice(index, 1);
+      updateCartBadge();
+      renderCartItems();
+    }
+
+    function updateQuantity(index, change) {
+      cartItems[index].quantity += change;
+      if (cartItems[index].quantity < 1) removeFromCart(index);
+      else renderCartItems();
+    }
+
+    function updateCartBadge() {
+      const total = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+      document.getElementById('cart-badge').textContent = total;
+    }
+
+    function showCartNotification(message) {
+      const notif = document.createElement('div');
+      notif.className = 'fixed bottom-4 right-4 px-6 py-4 rounded-xl text-white text-sm font-bold z-[100] animate-in shadow-xl flex items-center gap-2';
+      notif.style.background = '#22c55e';
+      notif.innerHTML = `<i data-lucide="check-circle" style="width:18px;height:18px;"></i> ${message}`;
+      document.body.appendChild(notif);
+      lucide.createIcons();
+      setTimeout(() => notif.remove(), 2500);
+    }
+
+    function openCart() {
+      document.getElementById('modal-title').textContent = '🛍️ Your Bag';
+      if (cartItems.length === 0) {
+        document.getElementById('modal-body').innerHTML = '<div class="text-center py-16 text-gray-400"><i data-lucide="shopping-bag" class="w-16 h-16 mx-auto mb-4 opacity-20"></i><p class="text-lg">Your bag is currently empty.</p></div>';
+        lucide.createIcons();
+      } else renderCartItems();
+      document.getElementById('modal-overlay').classList.add('active');
+    }
+
+    function renderCartItems() {
+      const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const tax = subtotal * 0.08;
+      const total = subtotal + tax;
+      
+      let html = '<div class="space-y-4 max-w-2xl mx-auto">';
+      cartItems.forEach((item, idx) => {
+        html += `
+          <div class="flex items-center gap-4 p-4 rounded-2xl" style="background:#faf8f5; border:1px solid #eee;">
+            <img src="${item.img}" class="w-20 h-20 object-cover rounded-xl shadow-sm">
+            <div class="flex-1">
+              <div class="font-bold text-gray-800 text-lg">${item.name}</div>
+              <div class="text-xs text-gray-500 font-bold bg-gray-200 inline-block px-2 py-0.5 rounded mt-1 mb-1">Size: ${item.size}</div>
+              <div class="text-sm text-green-600 font-bold">₵${item.price.toFixed(2)}</div>
+            </div>
+            <div class="flex items-center gap-3 bg-white rounded-lg border px-3 py-1.5 shadow-sm">
+              <button onclick="updateQuantity(${idx}, -1)" class="px-2 text-gray-500 hover:text-green-600 font-bold">-</button>
+              <span class="w-6 text-center text-sm font-bold">${item.quantity}</span>
+              <button onclick="updateQuantity(${idx}, 1)" class="px-2 text-gray-500 hover:text-green-600 font-bold">+</button>
+            </div>
+            <button onclick="removeFromCart(${idx})" class="p-3 text-red-300 hover:text-red-500 transition hover:bg-red-50 rounded-full"><i data-lucide="trash-2" style="width:20px;height:20px;"></i></button>
+          </div>`;
+      });
+      html += `</div>
+        <div class="border-t mt-8 pt-8 max-w-2xl mx-auto">
+          <div class="flex justify-between text-sm mb-3 text-gray-500 font-medium"><span>Subtotal</span><span>₵${subtotal.toFixed(2)}</span></div>
+          <div class="flex justify-between text-sm mb-6 text-gray-500 font-medium"><span>Tax (8%)</span><span>₵${tax.toFixed(2)}</span></div>
+          <div class="flex justify-between text-2xl font-bold mb-8 text-gray-800"><span>Total</span><span class="text-green-600">₵${total.toFixed(2)}</span></div>
+          <button onclick="openCheckout()" class="w-full py-4 rounded-2xl text-white font-bold text-lg transition hover:bg-green-700 shadow-lg" style="background:#22c55e;">Proceed to Checkout</button>
+        </div>`;
+      
+      document.getElementById('modal-body').innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function openCheckout() {
+      document.getElementById('modal-title').textContent = '💳 Secure Checkout';
+      const total = cartItems.reduce((s, i) => s + (i.price * i.quantity), 0) * 1.08;
+      document.getElementById('modal-body').innerHTML = `
+        <form onsubmit="submitCheckout(event)" class="space-y-5 max-w-lg mx-auto">
+          <div><label class="block text-sm font-bold mb-2 text-gray-700">Full Name</label><input type="text" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none" placeholder="Jane Doe"></div>
+          <div><label class="block text-sm font-bold mb-2 text-gray-700">Delivery Address</label><input type="text" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none" placeholder="Street Address, Koforidua"></div>
+          <div class="grid grid-cols-2 gap-4">
+            <div><label class="block text-sm font-bold mb-2 text-gray-700">City/Town</label><input type="text" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none" placeholder="Nkurakan"></div>
+            <div><label class="block text-sm font-bold mb-2 text-gray-700">Phone</label><input type="text" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none" placeholder="024 000 0000"></div>
+          </div>
+          <button type="submit" class="w-full py-4 flex justify-center items-center gap-2 rounded-2xl text-white font-bold transition mt-8 shadow-lg bg-green-500 hover:bg-green-600"><i data-lucide="check-circle"></i> Confirm Order (₵${total.toFixed(2)})</button>
+        </form>`;
+        lucide.createIcons();
+    }
+
+    function submitCheckout(e) {
+      e.preventDefault();
+      const form = e.target;
+      const inputs = form.querySelectorAll('input');
+      const total = cartItems.reduce((s, i) => s + (i.price * i.quantity), 0) * 1.08;
+      
+      let msg = `*🛍️ MickyHeart Collection Order*\n\n*Name:* ${inputs[0].value}\n*Location:* ${inputs[1].value}, ${inputs[2].value}\n*Contact:* ${inputs[3].value}\n\n*Items:*\n`;
+      cartItems.forEach((i, idx) => { msg += `${idx + 1}. ${i.name} [Size: ${i.size}] (x${i.quantity}) - ₵${(i.price * i.quantity).toFixed(2)}\n`; });
+      msg += `\n*Total Due: ₵${total.toFixed(2)}*`;
+      
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+      
+      cartItems = [];
+      updateCartBadge();
+      closeModal();
+      showCartNotification('Order sent to WhatsApp! 🎉');
+    }
+
+    function handleSearch() {
+      const q = document.getElementById('search-input').value.toLowerCase().trim();
+      if (!q) return;
+      const res = allProducts.filter(i => i.name.toLowerCase().includes(q));
+      
+      document.getElementById('modal-title').textContent = `Search: "${q}"`;
+      if (res.length === 0) {
+        document.getElementById('modal-body').innerHTML = '<div class="text-center py-16"><p class="text-gray-400 text-lg">No products found.</p></div>';
+      } else {
+        let html = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">';
+        res.forEach(item => {
+          html += `
+            <div class="rounded-2xl overflow-hidden group shadow-sm hover:shadow-xl transition cursor-pointer" style="background:#faf8f5; border:1px solid #eee;" onclick="openProductDetail('${item.categoryKey}', ${item.index})">
+              <div class="h-48 overflow-hidden"><img src="${item.img}" class="w-full h-full object-cover img-zoom"></div>
+              <div class="p-5">
+                <h4 class="font-bold text-gray-800">${item.name}</h4>
+                <p class="text-green-600 font-bold mt-2">₵${parseFloat(item.price).toFixed(2)}</p>
+              </div>
+            </div>`;
+        });
+        document.getElementById('modal-body').innerHTML = html + '</div>';
+      }
+      document.getElementById('modal-overlay').classList.add('active');
+    }
+
+    function toggleSearchBar() {
+      const sd = document.querySelector('.hidden.md\\:flex');
+      if (sd) { sd.classList.toggle('hidden'); if (!sd.classList.contains('hidden')) document.getElementById('search-input').focus(); }
+    }
+
+    function openWhatsApp() {
+      const text = cartItems.length > 0 ? `Hi! I have ${cartItems.length} items in my cart.` : 'Hi! I want to know more about MickyHeart Collection products.';
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    // --- ADMIN ---
+    function openAdmin() {
+      document.getElementById('admin-modal').classList.add('active');
+      
+      if (!isAdminAuthenticated) {
+        document.getElementById('admin-sidebar').classList.remove('flex');
+        document.getElementById('admin-sidebar').classList.add('hidden');
+        document.getElementById('admin-tab-list').classList.add('hidden');
+        document.getElementById('admin-tab-add').classList.add('hidden');
+        document.getElementById('admin-tab-login').classList.remove('hidden');
+        document.getElementById('admin-password-input').value = "";
+        document.getElementById('admin-login-error').classList.add('hidden');
+      } else {
+        switchAdminTab('list');
+      }
+      lucide.createIcons();
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const input = document.getElementById('admin-password-input').value;
+      if (input === ADMIN_PASSWORD) {
+        isAdminAuthenticated = true;
+        document.getElementById('admin-tab-login').classList.add('hidden');
+        document.getElementById('admin-sidebar').classList.remove('hidden');
+        document.getElementById('admin-sidebar').classList.add('flex');
+        switchAdminTab('list');
+      } else {
+        document.getElementById('admin-login-error').classList.remove('hidden');
+      }
+    }
+
+    function closeAdmin(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('admin-modal').classList.remove('active');
+    }
+
+    function switchAdminTab(tab) {
+      document.getElementById('admin-tab-login').classList.add('hidden');
+      
+      document.getElementById('admin-tab-list').classList.add('hidden');
+      document.getElementById('admin-tab-add').classList.add('hidden');
+      document.getElementById('tab-btn-list').className = 'flex items-center gap-3 px-4 py-3 rounded-lg font-bold text-sm text-gray-600 hover:bg-gray-200 transition';
+      document.getElementById('tab-btn-add').className = 'flex items-center gap-3 px-4 py-3 rounded-lg font-bold text-sm text-gray-600 hover:bg-gray-200 transition';
+      
+      if(tab === 'list') {
+        document.getElementById('admin-tab-list').classList.remove('hidden');
+        document.getElementById('tab-btn-list').className = 'flex items-center gap-3 px-4 py-3 rounded-lg font-bold text-sm bg-green-100 text-green-700 transition';
+        renderAdminList();
+      } else {
+        document.getElementById('admin-tab-add').classList.remove('hidden');
+        document.getElementById('tab-btn-add').className = 'flex items-center gap-3 px-4 py-3 rounded-lg font-bold text-sm bg-green-100 text-green-700 transition';
+        resetAdminForm();
+      }
+    }
+
+    function renderAdminList() {
+      const tbody = document.getElementById('admin-product-table');
+      let html = '';
+      if(allProducts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-400">No products found.</td></tr>';
+        return;
+      }
+      allProducts.forEach(item => {
+        const catTitle = categoriesData[item.categoryKey].title;
+        html += `
+          <tr class="hover:bg-gray-50 transition border-b border-gray-100">
+            <td class="p-4"><img src="${item.img}" class="w-12 h-12 rounded-lg object-cover border border-gray-200"></td>
+            <td class="p-4 font-bold text-gray-800">${item.name}</td>
+            <td class="p-4"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">${catTitle}</span></td>
+            <td class="p-4 font-bold text-green-600">₵${parseFloat(item.price).toFixed(2)}</td>
+            <td class="p-4 text-right">
+              <div class="flex justify-end gap-2">
+                <button onclick="editProduct('${item.categoryKey}', ${item.index})" class="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition font-bold"><i data-lucide="edit" class="w-4 h-4"></i> Edit</button>
+                <button onclick="deleteProduct('${item.categoryKey}', ${item.index})" class="flex items-center gap-1 px-3 py-1.5 text-sm bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition font-bold"><i data-lucide="trash-2" class="w-4 h-4"></i> Delete</button>
+              </div>
+            </td>
+          </tr>`;
+      });
+      tbody.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function compressAndPreview(e, imgNumber) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 600;
+          let scaleSize = 1;
+          if(img.width > MAX_WIDTH) scaleSize = MAX_WIDTH / img.width;
+          canvas.width = img.width * scaleSize;
+          canvas.height = img.height * scaleSize;
+          
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          
+          document.getElementById('admin-preview-' + imgNumber).src = compressedDataUrl;
+          document.getElementById('admin-preview-' + imgNumber).classList.remove('hidden');
+          document.getElementById('admin-icon-' + imgNumber).classList.add('hidden');
+          document.getElementById('admin-data-img-' + imgNumber).value = compressedDataUrl;
+        }
+        img.src = event.target.result;
+      }
+      reader.readAsDataURL(file);
+    }
+
+    document.getElementById('admin-prod-cat').addEventListener('change', function(e) {
+      const sizeInput = document.getElementById('admin-prod-sizes');
+      if (e.target.value === 'bedspread') {
+          sizeInput.placeholder = "e.g., Single Bed, Double Bed, King Size, Queen Size";
+      } else if (e.target.value === 'towels' || e.target.value === 'ladysbags') {
+          sizeInput.placeholder = "e.g., One Size";
+      } else {
+          sizeInput.placeholder = "e.g., S, M, L, XL";
+      }
+    });
+
+    function resetAdminForm() {
+      document.getElementById('admin-form-title').textContent = "Add New Product";
+      document.getElementById('admin-edit-index').value = "";
+      document.getElementById('admin-edit-original-cat').value = "";
+      
+      document.getElementById('admin-prod-name').value = "";
+      document.getElementById('admin-prod-cat').value = "kids";
+      document.getElementById('admin-prod-price').value = "";
+      document.getElementById('admin-prod-sizes').value = "";
+      document.getElementById('admin-prod-sizes').placeholder = "e.g., S, M, L, XL";
+      document.getElementById('admin-prod-desc').value = "";
+      
+      for(let i=1; i<=3; i++) {
+          document.getElementById('admin-data-img-' + i).value = "";
+          document.getElementById('admin-preview-' + i).src = "";
+          document.getElementById('admin-preview-' + i).classList.add('hidden');
+          document.getElementById('admin-icon-' + i).classList.remove('hidden');
+      }
+      document.getElementById('admin-data-img-1').setAttribute('required', 'true');
+    }
+
+    function editProduct(catKey, index) {
+      const item = categoriesData[catKey].items[index];
+      switchAdminTab('add');
+      
+      document.getElementById('admin-form-title').textContent = "Edit Product";
+      document.getElementById('admin-edit-index').value = index;
+      document.getElementById('admin-edit-original-cat').value = catKey;
+      
+      document.getElementById('admin-prod-name').value = item.name;
+      document.getElementById('admin-prod-cat').value = catKey;
+      document.getElementById('admin-prod-price').value = item.price;
+      document.getElementById('admin-prod-sizes').value = item.sizes || "";
+      document.getElementById('admin-prod-desc').value = item.description || "";
+      
+      const sizeInput = document.getElementById('admin-prod-sizes');
+      if (catKey === 'bedspread') sizeInput.placeholder = "e.g., Single Bed, Double Bed, King Size, Queen Size";
+      else if (catKey === 'towels' || catKey === 'ladysbags') sizeInput.placeholder = "e.g., One Size";
+      else sizeInput.placeholder = "e.g., S, M, L, XL";
+
+      document.getElementById('admin-data-img-1').removeAttribute('required');
+
+      const imgs = item.images || [item.img];
+      for(let i=1; i<=3; i++) {
+          const imgSrc = imgs[i-1];
+          if(imgSrc && imgSrc.length > 10) {
+              document.getElementById('admin-data-img-' + i).value = imgSrc;
+              document.getElementById('admin-preview-' + i).src = imgSrc;
+              document.getElementById('admin-preview-' + i).classList.remove('hidden');
+              document.getElementById('admin-icon-' + i).classList.add('hidden');
+          } else {
+              document.getElementById('admin-data-img-' + i).value = "";
+              document.getElementById('admin-preview-' + i).src = "";
+              document.getElementById('admin-preview-' + i).classList.add('hidden');
+              document.getElementById('admin-icon-' + i).classList.remove('hidden');
+          }
+      }
+    }
+
+    async function deleteProduct(catKey, index) {
+      if(confirm("Are you sure you want to delete this product?")) {
+        categoriesData[catKey].items.splice(index, 1);
+        await persistData();
+        renderAdminList();
+      }
+    }
+
+    async function saveProduct(e) {
+      e.preventDefault();
+      const name = document.getElementById('admin-prod-name').value;
+      const catKey = document.getElementById('admin-prod-cat').value;
+      const price = parseFloat(document.getElementById('admin-prod-price').value);
+      const description = document.getElementById('admin-prod-desc').value || defaultDesc;
+      
+      let sizes = document.getElementById('admin-prod-sizes').value;
+      if (!sizes) {
+          sizes = (catKey === 'bedspread') ? defaultBedSizes : defaultSizes;
+      }
+      
+      let img1 = document.getElementById('admin-data-img-1').value;
+      let img2 = document.getElementById('admin-data-img-2').value;
+      let img3 = document.getElementById('admin-data-img-3').value;
+      
+      if(!img1) img1 = catImages[catKey];
+      const imagesArr = [img1, img2, img3].filter(i => i && i.length > 5);
+
+      const newProduct = { name, price, img: img1, images: imagesArr, sizes, description };
+      
+      const editIndex = document.getElementById('admin-edit-index').value;
+      const originalCat = document.getElementById('admin-edit-original-cat').value;
+
+      if (editIndex !== "") {
+        if (originalCat === catKey) categoriesData[catKey].items[editIndex] = newProduct;
+        else {
+          categoriesData[originalCat].items.splice(editIndex, 1);
+          categoriesData[catKey].items.push(newProduct);
+        }
+      } else {
+        categoriesData[catKey].items.push(newProduct);
+      }
+
+      await persistData();
+      alert("Product saved successfully!");
+      switchAdminTab('list');
+    }
+
+    // Launch App Initializer
+    initApp();
+
+    window.addEventListener('resize', () => {
+      const sb = document.getElementById('sidebar'), mc = document.getElementById('main-content'), ob = document.getElementById('open-sidebar');
+      if (window.innerWidth < 1024) { sb.classList.add('closed'); mc.style.marginLeft = '0'; ob.classList.remove('hidden'); } 
+      else { sb.classList.remove('closed'); mc.style.marginLeft = '260px'; ob.classList.add('hidden'); }
+    });
+    window.dispatchEvent(new Event('resize'));
+    document.getElementById('open-sidebar').addEventListener('click', () => document.getElementById('sidebar').classList.remove('closed'));
+    document.getElementById('close-sidebar').addEventListener('click', () => document.getElementById('sidebar').classList.add('closed'));
+
+  </script>
+ </body>
+</html>
