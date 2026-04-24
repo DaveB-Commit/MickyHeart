@@ -319,7 +319,7 @@
 
             <div class="pt-6 border-t border-gray-200 flex justify-end gap-3">
               <button type="button" onclick="switchAdminTab('list')" class="px-6 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition">Cancel</button>
-              <button type="submit" class="px-8 py-3 rounded-xl font-bold text-white bg-green-500 hover:bg-green-600 transition shadow-lg">Save Product</button>
+              <button type="submit" class="px-8 py-3 rounded-xl font-bold text-white bg-green-500 hover:bg-green-600 transition shadow-lg flex items-center gap-2">Save Product</button>
             </div>
           </form>
         </div>
@@ -1019,6 +1019,14 @@
 
     async function saveProduct(e) {
       e.preventDefault();
+      
+      // SHOW LOADING STATE
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...`;
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+
       const name = document.getElementById('admin-prod-name').value;
       const catKey = document.getElementById('admin-prod-cat').value;
       const price = parseFloat(document.getElementById('admin-prod-price').value);
@@ -1053,6 +1061,12 @@
       }
 
       await pushDataToServer();
+      
+      // RESTORE BUTTON STATE
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+
       alert("Product saved successfully!");
       switchAdminTab('list');
     }
