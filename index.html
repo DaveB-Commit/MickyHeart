@@ -436,84 +436,62 @@
     };
 
 
-    // --- OLD INDEXED DB READER (For Migration Only) ---
-    function readOldIndexedDB() {
+    // ==========================================
+    // 💾 HYBRID DATABASE ENGINE (IndexedDB + Firebase)
+    // ==========================================
+
+    function openIndexedDB() {
       return new Promise((resolve, reject) => {
         const request = indexedDB.open('MickyHeartDB', 1);
-        request.onsuccess = (e) => {
-          try {
-              const db = e.target.result;
-              const tx = db.transaction('store', 'readonly');
-              const store = tx.objectStore('store');
-              const req = store.get('categoriesData');
-              req.onsuccess = () => resolve(req.result);
-              req.onerror = () => resolve(null);
-          } catch(err) {
-              resolve(null);
-          }
+        request.onupgradeneeded = (e) => { 
+            const db = e.target.result;
+            if(!db.objectStoreNames.contains('store')) {
+                db.createObjectStore('store'); 
+            }
         };
-        request.onerror = () => resolve(null);
+        request.onsuccess = (e) => resolve(e.target.result);
+        request.onerror = (e) => reject(e.target.error);
       });
     }
 
-    // --- FIREBASE DATABASE ENGINE ---
-    async function loadDataFromDB() {
+    async function loadFromIndexedDB() {
       try {
-        const snapshot = await database.ref('store/categoriesData').once('value');
-        const data = snapshot.val();
-        
-        if (data) {
-            console.log("Data loaded from Firebase!");
-            return data;
-        } else {
-            console.log("No Firebase data found. Attempting to migrate old data...");
-            // MIGRATION SCRIPT: Check IndexedDB first, then localStorage
-            let oldData = await readOldIndexedDB();
-            if(!oldData) {
-                const oldLocalStr = localStorage.getItem('mickyheart_db');
-                if (oldLocalStr) oldData = JSON.parse(oldLocalStr);
-            }
-
-            const finalDataToUse = oldData || defaultCategoriesData;
-            await saveDataToDB(finalDataToUse); // Push to Firebase
-            return finalDataToUse;
-        }
-      } catch (error) {
-        console.error("Firebase connection error! Are your config keys correct?", error);
-        alert("Warning: Could not connect to database. Displaying default offline data.");
-        return defaultCategoriesData;
+        const db = await openIndexedDB();
+        return new Promise((resolve) => {
+            const tx = db.transaction('store', 'readonly');
+            const req = tx.objectStore('store').get('categoriesData');
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => resolve(null);
+        });
+      } catch (e) {
+          return null;
       }
     }
 
-    async function saveDataToDB(data) {
+    async function saveToIndexedDB(data) {
       try {
-        await database.ref('store/categoriesData').set(data);
-        console.log("Successfully saved to Firebase!");
-      } catch(error) {
-        console.error("Failed to save to Firebase:", error);
-        alert("Failed to save data. Please check your Firebase permissions/rules.");
+        const db = await openIndexedDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction('store', 'readwrite');
+            tx.objectStore('store').put(data, 'categoriesData');
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject();
+        });
+      } catch (e) {
+          console.error("Failed to save to local IndexedDB", e);
       }
     }
 
-
-    // --- INITIALIZATION ---
-    async function initApp() {
-        categoriesData = await loadDataFromDB();
-        
+    function enforceDataStructure(data) {
         let needsUpdate = false;
-        
-        // Auto-upgrade structure and enforce new naming conventions
-        Object.keys(categoriesData).forEach(cat => {
-            
-            // Enforce updated category titles for existing DB records
-            if (cat === 'women' && categoriesData[cat].title !== "Ladies Wear") { categoriesData[cat].title = "Ladies Wear"; needsUpdate = true; }
-            if (cat === 'ladysbags' && categoriesData[cat].title !== "Ladies Bags") { categoriesData[cat].title = "Ladies Bags"; needsUpdate = true; }
-            if (cat === 'men' && categoriesData[cat].title !== "Gents Wear") { categoriesData[cat].title = "Gents Wear"; needsUpdate = true; }
+        Object.keys(data).forEach(cat => {
+            if (cat === 'women' && data[cat].title !== "Ladies Wear") { data[cat].title = "Ladies Wear"; needsUpdate = true; }
+            if (cat === 'ladysbags' && data[cat].title !== "Ladies Bags") { data[cat].title = "Ladies Bags"; needsUpdate = true; }
+            if (cat === 'men' && data[cat].title !== "Gents Wear") { data[cat].title = "Gents Wear"; needsUpdate = true; }
 
-            // Ensure categories map exactly to array structures in Firebase (Firebase sometimes drops empty arrays)
-            if(!categoriesData[cat].items) categoriesData[cat].items = [];
+            if(!data[cat].items) data[cat].items = [];
 
-            categoriesData[cat].items.forEach(item => {
+            data[cat].items.forEach(item => {
                 if(!item.description) { item.description = defaultDesc; needsUpdate = true; }
                 if(!item.sizes || (cat === 'bedspread' && item.sizes === defaultSizes)) {
                     item.sizes = (cat === 'bedspread') ? defaultBedSizes : defaultSizes;
@@ -522,14 +500,7 @@
                 if(!item.images || item.images.length === 0) { item.images = [item.img, item.img, item.img]; needsUpdate = true; }
             });
         });
-
-        if (needsUpdate) {
-            await persistData();
-        } else {
-            buildGlobalProductList();
-        }
-        
-        lucide.createIcons();
+        return needsUpdate;
     }
 
     function buildGlobalProductList() {
@@ -543,13 +514,70 @@
         });
     }
 
-    async function persistData() {
-        await saveDataToDB(categoriesData);
-        buildGlobalProductList();
+    async function initApp() {
+        // STEP 1: Fast Load from Local IndexedDB (Offline-First)
+        const localData = await loadFromIndexedDB();
+        if (localData) {
+            console.log("⚡ Fast Boot from IndexedDB");
+            categoriesData = localData;
+            buildGlobalProductList();
+        } else {
+            console.log("No local data found. Using defaults until Firebase connects.");
+            categoriesData = defaultCategoriesData;
+            buildGlobalProductList();
+        }
+        lucide.createIcons();
+
+        // STEP 2: Connect to Live Firebase to Sync
+        database.ref('store/categoriesData').on('value', async (snapshot) => {
+            const serverData = snapshot.val();
+            
+            if (serverData) {
+                console.log("☁️ Live Sync from Firebase Database");
+                categoriesData = serverData;
+                
+                // Ensure data meets our rules
+                const neededFixes = enforceDataStructure(categoriesData);
+                
+                // Update Local IndexedDB so it's ready for the next offline boot
+                await saveToIndexedDB(categoriesData);
+                buildGlobalProductList();
+                
+                // If data was missing properties on the server, auto-fix it on the server
+                if(neededFixes) {
+                    await database.ref('store/categoriesData').set(categoriesData);
+                }
+
+                // If admin tab is open, automatically refresh the list so they see new changes immediately
+                const adminList = document.getElementById('admin-tab-list');
+                if(adminList && !adminList.classList.contains('hidden')) {
+                    renderAdminList();
+                }
+            } else {
+                // If Firebase is completely empty, upload our local/default data to it
+                console.log("Firebase is empty! Pushing initial setup data...");
+                await database.ref('store/categoriesData').set(categoriesData);
+            }
+        });
+    }
+
+    async function pushDataToServer() {
+        // We only push to Firebase. The `.on('value')` listener above will automatically 
+        // detect this push, update the local IndexedDB, and rebuild the global arrays!
+        try {
+            await database.ref('store/categoriesData').set(categoriesData);
+            console.log("Changes pushed to Firebase Successfully!");
+        } catch(error) {
+            console.error("Failed to push to Firebase:", error);
+            alert("Error saving data to the cloud. Check your connection.");
+        }
     }
 
 
-    // --- UI LOGIC ---
+    // ==========================================
+    // UI LOGIC 
+    // ==========================================
+
     function openCategoryModal(key) {
       const data = categoriesData[key];
       if (!data || !data.items || data.items.length === 0) return alert("No products here yet!");
@@ -580,7 +608,11 @@
         window.currentSelectedSize = null;
 
         const sizeArray = item.sizes ? item.sizes.split(',').map(s => s.trim()).filter(s => s) : ['One Size'];
-        const sizeHtml = sizeArray.map(s => `<button type="button" onclick="selectSizeBtn(this, '${s}')" class="size-btn px-4 py-2 border-2 border-gray-200 rounded-lg font-bold text-gray-600 hover:border-green-500 transition">${s}</button>`).join('');
+        const sizeHtml = sizeArray.map(s => {
+            // Escape any quotes in the size string to prevent breaking the button logic
+            const safeSize = s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            return `<button type="button" onclick="selectSizeBtn(this, '${safeSize}')" class="size-btn px-4 py-2 border-2 border-gray-200 rounded-lg font-bold text-gray-600 hover:border-green-500 transition">${s}</button>`;
+        }).join('');
 
         const validImages = item.images.filter(img => img && img.length > 10);
         const galleryHtml = validImages.map((img, i) => `<img src="${img}" onclick="document.getElementById('main-detail-img').src='${img}'" class="w-20 h-20 object-cover rounded-xl border-2 border-transparent hover:border-green-500 cursor-pointer shadow-sm transition">`).join('');
@@ -607,7 +639,7 @@
                 <div class="flex flex-wrap gap-3">${sizeHtml}</div>
               </div>
               <div class="mt-auto pt-10">
-                <button onclick="handleAddDetailToCart('${item.name}', ${item.price}, '${item.img}', ${sizeArray.length === 1 && sizeArray[0] === 'One Size'})" class="w-full bg-green-500 text-white font-bold py-4 rounded-2xl hover:bg-green-600 transition shadow-lg text-lg flex justify-center items-center gap-2"><i data-lucide="shopping-bag"></i> Add to Bag</button>
+                <button onclick="handleAddDetailToCart('${catKey}', ${index})" class="w-full bg-green-500 text-white font-bold py-4 rounded-2xl hover:bg-green-600 transition shadow-lg text-lg flex justify-center items-center gap-2"><i data-lucide="shopping-bag"></i> Add to Bag</button>
               </div>
             </div>
           </div>
@@ -626,21 +658,29 @@
         document.getElementById('size-warning').classList.add('hidden');
     }
 
-    function handleAddDetailToCart(name, price, img, isOneSize) {
-        if (isOneSize) window.currentSelectedSize = 'One Size';
+    function handleAddDetailToCart(catKey, index) {
+        const item = categoriesData[catKey].items[index];
+        const sizeArray = item.sizes ? item.sizes.split(',').map(s => s.trim()).filter(s => s) : ['One Size'];
+        
+        // Auto-select if there is only 1 size option
+        if (sizeArray.length === 1) {
+            window.currentSelectedSize = sizeArray[0];
+        }
+
         if (!window.currentSelectedSize) {
             document.getElementById('size-warning').classList.remove('hidden');
             return;
         }
         
-        const existingItem = cartItems.find(item => item.name === name && item.size === window.currentSelectedSize);
+        const existingItem = cartItems.find(i => i.name === item.name && i.size === window.currentSelectedSize);
         if (existingItem) {
             existingItem.quantity++;
         } else {
-            cartItems.push({ name: name, size: window.currentSelectedSize, price: parseFloat(price), img: img, quantity: 1 });
+            cartItems.push({ name: item.name, size: window.currentSelectedSize, price: parseFloat(item.price), img: item.img, quantity: 1 });
         }
+        
         updateCartBadge();
-        showCartNotification(`${name} (${window.currentSelectedSize}) added!`);
+        showCartNotification(`${item.name} (${window.currentSelectedSize}) added!`);
     }
 
     function closeModal(e) {
@@ -973,8 +1013,7 @@
     async function deleteProduct(catKey, index) {
       if(confirm("Are you sure you want to delete this product?")) {
         categoriesData[catKey].items.splice(index, 1);
-        await persistData();
-        renderAdminList();
+        await pushDataToServer();
       }
     }
 
@@ -1013,7 +1052,7 @@
         categoriesData[catKey].items.push(newProduct);
       }
 
-      await persistData();
+      await pushDataToServer();
       alert("Product saved successfully!");
       switchAdminTab('list');
     }
