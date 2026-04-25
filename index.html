@@ -19,6 +19,9 @@
     * { box-sizing: border-box; }
     .font-display { font-family: 'Playfair Display', Georgia, serif; }
     .font-body { font-family: 'DM Sans', sans-serif; }
+    
+    /* CUSTOM BRUSH SCRIPT FONT CLASS */
+    .font-brush { font-family: 'Brush Script MT', 'Lucida Handwriting', cursive; }
 
     .sidebar { width: 260px; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
     .sidebar.closed { transform: translateX(-100%); }
@@ -41,7 +44,7 @@
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     .animate-in { animation: fadeInUp 0.5s ease forwards; }
 
-    /* Custom Scrollbar for Admin Table */
+    /* Custom Scrollbar for Admin Table & Details */
     .admin-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
     .admin-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
     .admin-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
@@ -53,26 +56,26 @@
     
    <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full z-40 flex flex-col" style="background:#22c55e; color:#ffffff;">
     <div class="p-6 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,0.2);">
-     <div class="flex items-center gap-3">
-      <img src="logo.png" alt="Logo" class="w-16 h-16 rounded-full bg-white object-cover border-2 border-white shadow-sm" onerror="this.src='logo.png'">
-      <div>
-       <div class="font-display text-lg font-bold" style="color:#ffffff;">MickyHeart</div>
-       <div class="text-[10px] mt-0.5 tracking-widest uppercase" style="color:rgba(255,255,255,0.8);">Collection</div>
+     <div class="flex items-center gap-3 cursor-pointer" onclick="showView('view-home')">
+      <img src="logo.png" alt="Logo" class="w-10 h-10 rounded-full bg-white object-cover border-2 border-white shadow-sm" onerror="this.src='https://img.icons8.com/color/96/000000/hearts.png'">
+      <div class="flex flex-col justify-center">
+       <div class="font-display text-xl font-bold leading-none" style="color:#ffffff;">MickyHeart</div>
+       <div class="font-brush text-2xl leading-none mt-1" style="color:rgba(255,255,255,0.9);">Collection</div>
       </div>
      </div>
      <button id="close-sidebar" class="p-1 rounded hover:bg-white/10 transition lg:hidden"><i data-lucide="x" style="width:20px;height:20px;color:rgba(255,255,255,0.7);"></i></button>
     </div>
     <nav class="flex-1 py-4 overflow-y-auto">
      <div class="px-5 py-2 text-[10px] tracking-[3px] uppercase" style="color:rgba(255,255,255,0.5);">Apparel & Accessories</div>
-     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('kids')"> <i data-lucide="baby" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Kids Wear</span> </button> 
-     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('women')"> <i data-lucide="flower-2" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Ladies Wear</span> </button> 
-     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('ladysbags')"> <i data-lucide="shopping-bag" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Ladies Bags</span> </button> 
-     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('men')"> <i data-lucide="shirt" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Gents Wear</span> </button>
-     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('poloshirts')"> <i data-lucide="shirt" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Polo Shirts</span> </button>
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategory('kids')"> <i data-lucide="baby" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Kids Wear</span> </button> 
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategory('women')"> <i data-lucide="flower-2" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Ladies Wear</span> </button> 
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategory('ladysbags')"> <i data-lucide="shopping-bag" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Ladies Bags</span> </button> 
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategory('men')"> <i data-lucide="shirt" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Gents Wear</span> </button>
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategory('poloshirts')"> <i data-lucide="shirt" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Polo Shirts</span> </button>
      
      <div class="px-5 py-2 mt-4 text-[10px] tracking-[3px] uppercase" style="color:rgba(255,255,255,0.5);">Home & More</div>
-     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('bedspread')"> <i data-lucide="bed-double" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Bedspreads</span> </button> 
-     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategoryModal('towels')"> <i data-lucide="droplets" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Towels</span> </button> 
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategory('bedspread')"> <i data-lucide="bed-double" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Bedspreads</span> </button> 
+     <button class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 cursor-pointer" onclick="openCategory('towels')"> <i data-lucide="droplets" style="width:18px;height:18px;color:#ffffff;"></i> <span class="text-sm font-medium">Towels</span> </button> 
     </nav>
     <div class="p-5 text-center" style="border-top:1px solid rgba(255,255,255,0.2);">
      <button id="install-app-btn" onclick="installApp()" class="hidden w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-bold text-green-600 bg-white hover:bg-gray-100 transition shadow-lg mb-3">
@@ -111,9 +114,11 @@
       
       <div class="flex items-center gap-3">
        <button id="open-sidebar" class="p-2 -ml-2 rounded-lg hover:bg-black/5 transition hidden"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
-       <div class="flex items-center gap-2">
-        <img src="logo.png" alt="Logo" class="w-10 h-10 object-cover rounded-full shadow-sm" onerror="this.src='logo.png'">
-        <div id="topbar-brand" class="font-display text-lg font-semibold" style="color:#22c55e;">MickyHeart Collection</div>
+       <div class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition" onclick="showView('view-home')">
+        <img src="logo.png" alt="Logo" class="w-7 h-7 object-cover rounded-full shadow-sm" onerror="this.src='https://img.icons8.com/color/96/000000/hearts.png'">
+        <div id="topbar-brand" class="font-display text-xl font-semibold flex items-baseline gap-1.5" style="color:#22c55e;">
+          MickyHeart <span class="font-brush text-2xl font-normal" style="color:#16a34a;">Collection</span>
+        </div>
        </div>
       </div>
 
@@ -132,68 +137,76 @@
 
     </header>
 
-    <div class="flex-1">
-      <section class="relative px-4 sm:px-8 py-20 md:py-32 flex flex-col items-center justify-center text-center overflow-hidden min-h-[50vh] md:min-h-[60vh]">
-       <img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1600&q=80" class="absolute inset-0 w-full h-full object-cover">
-       <div class="absolute inset-0 bg-black/50"></div>
-       <div class="relative z-10 flex flex-col items-center">
-           <div class="animate-in"><span class="inline-block text-[10px] tracking-[5px] uppercase font-semibold px-4 py-1.5 rounded-full mb-4 md:mb-6 backdrop-blur-md border border-white/30 text-white" style="background:rgba(255,255,255,0.1);">Season 2026</span></div>
-           <h1 id="hero-heading" class="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight max-w-3xl animate-in delay-1 text-white">Dress Bold. Live Bright.</h1>
-           <p id="hero-subtext" class="mt-4 md:mt-5 text-sm sm:text-base md:text-xl max-w-lg leading-relaxed animate-in delay-2 text-white/90">Curated fashion for every heartbeat — from playful kids styles to elegant pieces for him &amp; her.</p>
-           <div class="mt-6 md:mt-8 flex gap-3 animate-in delay-3">
-              <button class="px-6 py-3 md:px-8 md:py-4 rounded-full text-sm font-semibold text-white transition hover:opacity-90 shadow-xl hover:scale-105" style="background:#22c55e;" onclick="openCategoryModal('women')">Explore New Collection</button> 
-           </div>
-       </div>
-      </section>
-
-      <section class="px-4 sm:px-8 py-12 md:py-16">
-       <div class="text-center mb-8 md:mb-10">
-        <h2 class="font-display text-2xl md:text-3xl font-bold">Shop by Category</h2>
-       </div>
-       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
-        <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('kids')"><img src="Kids Wear.jpg" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Kids Wear</h3></div></div>
-        <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('women')"><img src="Ladies Wear.jpg" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Ladies Wear</h3></div></div>
-        <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('ladysbags')"><img src="Ladies Bags.jpg" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Ladies Bags</h3></div></div>
-        <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('men')"><img src="Gents Wear.jpg" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Gents Wear</h3></div></div>
-        <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('poloshirts')"><img src="Polo Shirts.jpg" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Polo Shirts</h3></div></div>
-        <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('towels')"><img src="Towels.jpg" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Towels</h3></div></div>
-        <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategoryModal('bedspread')"><img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Bedspreads</h3></div></div>
-       </div>
-      </section>
-    </div>
-
-    <footer class="px-8 py-10 text-gray-500 border-t border-green-100 bg-white">
-     <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
+    <div class="flex-1 flex flex-col relative w-full">
       
-      <div class="flex-1 w-full text-center md:text-left flex flex-col items-center md:items-start">
-       <div class="flex items-center gap-2 mb-2">
-         <img src="logo.png" alt="Logo" class="w-6 h-6 object-cover rounded-full" onerror="this.src='logo.png'">
-         <div class="font-display text-2xl font-bold text-green-600">MickyHeart</div>
+      <div id="view-home" class="block w-full flex-1">
+        <section class="relative px-4 sm:px-8 py-20 md:py-32 flex flex-col items-center justify-center text-center overflow-hidden min-h-[50vh] md:min-h-[60vh]">
+         <img src="https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1600&q=80" class="absolute inset-0 w-full h-full object-cover">
+         <div class="absolute inset-0 bg-black/50"></div>
+         <div class="relative z-10 flex flex-col items-center">
+             <div class="animate-in"><span class="inline-block text-[10px] tracking-[5px] uppercase font-semibold px-4 py-1.5 rounded-full mb-4 md:mb-6 backdrop-blur-md border border-white/30 text-white" style="background:rgba(255,255,255,0.1);">Season 2026</span></div>
+             <h1 id="hero-heading" class="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight max-w-3xl animate-in delay-1 text-white">Dress Bold. Live Bright.</h1>
+             <p id="hero-subtext" class="mt-4 md:mt-5 text-sm sm:text-base md:text-xl max-w-lg leading-relaxed animate-in delay-2 text-white/90">Curated fashion for every heartbeat — from playful kids styles to elegant pieces for him &amp; her.</p>
+             <div class="mt-6 md:mt-8 flex gap-3 animate-in delay-3">
+                <button class="px-6 py-3 md:px-8 md:py-4 rounded-full text-sm font-semibold text-white transition hover:opacity-90 shadow-xl hover:scale-105" style="background:#22c55e;" onclick="openCategory('women')">Explore New Collection</button> 
+             </div>
+         </div>
+        </section>
+
+        <section class="px-4 sm:px-8 py-12 md:py-16">
+         <div class="text-center mb-8 md:mb-10">
+          <h2 class="font-display text-2xl md:text-3xl font-bold">Shop by Category</h2>
+         </div>
+         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-5xl mx-auto">
+          <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategory('kids')"><img src="Kids Wear.jpg" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Kids Wear</h3></div></div>
+          <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategory('women')"><img src="Ladies Wear.jpg" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Ladies Wear</h3></div></div>
+          <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategory('ladysbags')"><img src="Ladies Bags.jpg" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Ladies Bags</h3></div></div>
+          <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategory('men')"><img src="Gents Wear.jpg" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Gents Wear</h3></div></div>
+          <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategory('poloshirts')"><img src="Polo Shirts.jpg" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Polo Shirts</h3></div></div>
+          <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategory('towels')"><img src="Towels.jpg" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Towels</h3></div></div>
+          <div class="product-card group relative h-48 sm:h-64 rounded-2xl overflow-hidden cursor-pointer" onclick="openCategory('bedspread')"><img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover img-zoom"><div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-5 sm:p-6"><h3 class="font-display text-xl sm:text-2xl font-bold text-white">Bedspreads</h3></div></div>
+         </div>
+        </section>
+      </div>
+
+      <div id="view-category" class="hidden w-full flex-1 px-4 sm:px-8 py-8 md:py-12 max-w-7xl mx-auto min-h-[70vh]"></div>
+
+      <div id="view-product" class="hidden w-full flex-1 px-4 sm:px-8 py-8 md:py-12 max-w-6xl mx-auto min-h-[70vh]"></div>
+
+
+      <footer class="px-8 py-10 text-gray-500 border-t border-green-100 bg-white w-full mt-auto">
+       <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
+        
+        <div class="flex-1 w-full text-center md:text-left flex flex-col items-center md:items-start">
+         <div class="flex items-center gap-2 mb-2 cursor-pointer hover:opacity-80 transition" onclick="showView('view-home')">
+           <img src="logo.png" alt="Logo" class="w-6 h-6 object-cover rounded-full" onerror="this.src='https://img.icons8.com/color/96/000000/hearts.png'">
+           <div class="font-display text-2xl font-bold text-green-600 flex items-baseline gap-1.5">MickyHeart <span class="font-brush text-3xl font-normal text-green-500">Collection</span></div>
+         </div>
+         <p class="text-sm opacity-80">Crafted with love — Fashion for every heartbeat.</p>
+        </div>
+
+        <div class="flex-1 w-full text-center">
+         <p class="text-sm font-medium text-gray-700 mb-1">Koforidua Nkurakan, Eastern Region, Ghana</p>
+         <p class="text-sm">Support: 0539248634 / 0248058689</p>
+        </div>
+
+        <div class="flex-1 w-full flex justify-center md:justify-end items-center gap-4">
+         <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-green-500 hover:text-white transition shadow-sm border border-gray-100" aria-label="Facebook">
+          <i data-lucide="facebook" class="w-5 h-5"></i>
+         </a>
+         <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-green-500 hover:text-white transition shadow-sm border border-gray-100" aria-label="TikTok">
+           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+             <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+           </svg>
+         </a>
+         <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-green-500 hover:text-white transition shadow-sm border border-gray-100" aria-label="Instagram">
+          <i data-lucide="instagram" class="w-5 h-5"></i>
+         </a>
+        </div>
+
        </div>
-       <p class="text-sm opacity-80">Crafted with love — Fashion for every heartbeat.</p>
-      </div>
-
-      <div class="flex-1 w-full text-center">
-       <p class="text-sm font-medium text-gray-700 mb-1">Koforidua Nkurakan, Eastern Region, Ghana</p>
-       <p class="text-sm">Support: 0539248634 / 0248058689</p>
-      </div>
-
-      <div class="flex-1 w-full flex justify-center md:justify-end items-center gap-4">
-       <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-green-500 hover:text-white transition shadow-sm border border-gray-100" aria-label="Facebook">
-        <i data-lucide="facebook" class="w-5 h-5"></i>
-       </a>
-       <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-green-500 hover:text-white transition shadow-sm border border-gray-100" aria-label="TikTok">
-         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-           <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-         </svg>
-       </a>
-       <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-green-500 hover:text-white transition shadow-sm border border-gray-100" aria-label="Instagram">
-        <i data-lucide="instagram" class="w-5 h-5"></i>
-       </a>
-      </div>
-
-     </div>
-    </footer>
+      </footer>
+    </div>
    </div>
   </div>
 
@@ -359,7 +372,7 @@
 
 
     // --- PWA SETUP (Make the app installable) ---
-    const logoUrl = "logo.png"; 
+    const logoUrl = "YOUR_LOGO_URL_HERE"; 
     const fallbackLogoUrl = "https://img.icons8.com/color/192/000000/hearts.png";
 
     const manifestJSON = {
@@ -404,10 +417,17 @@
 
     // --- GLOBALS ---
     const WHATSAPP_NUMBER = '233539248634'; 
-    let cartItems = [];
     let allProducts = [];
     window.currentSelectedSize = null; 
     let categoriesData = {}; 
+
+    // CART PERSISTENCE
+    let cartItems = JSON.parse(localStorage.getItem('mickyheart_cart')) || [];
+    
+    function saveCart() {
+        localStorage.setItem('mickyheart_cart', JSON.stringify(cartItems));
+        updateCartBadge();
+    }
 
     // SECURITY SETTINGS
     const ADMIN_PASSWORD = "admin123";
@@ -523,6 +543,9 @@
     }
 
     async function initApp() {
+        // Init cart badge on load
+        updateCartBadge();
+        
         // STEP 1: Fast Load from Local IndexedDB (Offline-First)
         const localData = await loadFromIndexedDB();
         if (localData) {
@@ -583,41 +606,60 @@
 
 
     // ==========================================
-    // UI LOGIC 
+    // UI LOGIC (SPA NAVIGATION)
     // ==========================================
 
-    function openCategoryModal(key) {
+    function showView(viewId) {
+        document.getElementById('view-home').classList.add('hidden');
+        document.getElementById('view-category').classList.add('hidden');
+        document.getElementById('view-product').classList.add('hidden');
+        
+        document.getElementById(viewId).classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openCategory(key) {
       const data = categoriesData[key];
       if (!data || !data.items || data.items.length === 0) return alert("No products here yet!");
       
-      document.getElementById('modal-title').textContent = data.title;
-      let html = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">';
+      let html = `
+        <div class="flex items-center gap-2 mb-6 animate-in">
+          <button onclick="showView('view-home')" class="text-sm font-bold text-gray-500 hover:text-green-600 transition flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Home</button>
+          <span class="text-gray-300">/</span>
+          <h2 class="font-display text-2xl md:text-3xl font-bold text-gray-800">${data.title}</h2>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-in delay-1">
+      `;
       
       data.items.forEach((item, idx) => {
         html += `
-          <div class="rounded-2xl overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer" style="background:#faf8f5; border:1px solid #eee;" onclick="openProductDetail('${key}', ${idx})">
-            <div class="h-48 sm:h-56 overflow-hidden bg-gray-100 relative">
+          <div class="rounded-2xl overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col" style="background:#faf8f5; border:1px solid #eee;" onclick="openProduct('${key}', ${idx})">
+            <div class="h-48 sm:h-56 overflow-hidden bg-gray-100 relative w-full">
               <img src="${item.img}" class="w-full h-full object-cover img-zoom">
               <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition flex items-center justify-center"><span class="bg-white px-4 py-2 rounded-full text-xs font-bold shadow">View Details</span></div>
             </div>
-            <div class="p-4 sm:p-5">
-              <h4 class="font-display font-bold text-gray-800 text-lg truncate">${item.name}</h4>
-              <p class="font-bold text-green-600 mt-1 sm:mt-2 text-lg">₵${parseFloat(item.price).toFixed(2)}</p>
+            <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+              <h4 class="font-display font-bold text-gray-800 text-base sm:text-lg line-clamp-2">${item.name}</h4>
+              <p class="font-bold text-green-600 mt-2 text-lg">₵${parseFloat(item.price).toFixed(2)}</p>
             </div>
           </div>`;
       });
       html += '</div>';
-      document.getElementById('modal-body').innerHTML = html;
-      document.getElementById('modal-overlay').classList.add('active');
+      
+      document.getElementById('view-category').innerHTML = html;
+      showView('view-category');
+      lucide.createIcons();
+
+      // Auto close sidebar on mobile
+      if(window.innerWidth < 1024) document.getElementById('sidebar').classList.add('closed');
     }
 
-    function openProductDetail(catKey, index) {
+    function openProduct(catKey, index) {
         const item = categoriesData[catKey].items[index];
         window.currentSelectedSize = null;
 
         const sizeArray = item.sizes ? item.sizes.split(',').map(s => s.trim()).filter(s => s) : ['One Size'];
         const sizeHtml = sizeArray.map(s => {
-            // Escape any quotes in the size string to prevent breaking the button logic
             const safeSize = s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
             return `<button type="button" onclick="selectSizeBtn(this, '${safeSize}')" class="size-btn px-4 py-2 border-2 border-gray-200 rounded-lg font-bold text-gray-600 hover:border-green-500 transition text-sm sm:text-base">${s}</button>`;
         }).join('');
@@ -625,33 +667,35 @@
         const validImages = item.images.filter(img => img && img.length > 10);
         const galleryHtml = validImages.map((img, i) => `<img src="${img}" onclick="document.getElementById('main-detail-img').src='${img}'" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border-2 border-transparent hover:border-green-500 cursor-pointer shadow-sm transition">`).join('');
 
-        document.getElementById('modal-title').textContent = "Product Details";
-        document.getElementById('modal-body').innerHTML = `
-          <div class="flex flex-col md:flex-row gap-6 sm:gap-10 animate-in">
+        document.getElementById('view-product').innerHTML = `
+          <div class="flex items-center gap-2 mb-6 animate-in">
+             <button onclick="openCategory('${catKey}')" class="text-sm font-bold text-gray-500 hover:text-green-600 transition flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to ${categoriesData[catKey].title}</button>
+          </div>
+          <div class="flex flex-col md:flex-row gap-6 sm:gap-10 animate-in delay-1">
             <div class="w-full md:w-1/2 flex flex-col gap-4">
-              <div class="w-full h-64 sm:h-96 bg-gray-100 rounded-2xl sm:rounded-3xl overflow-hidden shadow-inner border border-gray-200">
+              <div class="w-full h-72 sm:h-96 md:h-[500px] bg-gray-100 rounded-2xl sm:rounded-3xl overflow-hidden shadow-inner border border-gray-200">
                 <img id="main-detail-img" src="${item.img}" class="w-full h-full object-cover">
               </div>
               <div class="flex gap-3 sm:gap-4 overflow-x-auto pb-2 admin-scroll">${galleryHtml}</div>
             </div>
             <div class="w-full md:w-1/2 flex flex-col">
-              <button onclick="openCategoryModal('${catKey}')" class="self-start mb-4 sm:mb-6 text-sm font-bold text-gray-500 hover:text-green-600 transition flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to ${categoriesData[catKey].title}</button>
-              <h2 class="text-3xl sm:text-4xl font-display font-bold text-gray-900">${item.name}</h2>
-              <p class="text-2xl sm:text-3xl text-green-600 font-bold mt-2 sm:mt-3">₵${parseFloat(item.price).toFixed(2)}</p>
+              <h2 class="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-gray-900">${item.name}</h2>
+              <p class="text-2xl sm:text-3xl text-green-600 font-bold mt-2 sm:mt-4">₵${parseFloat(item.price).toFixed(2)}</p>
               <div class="mt-6 sm:mt-8">
                 <h4 class="font-bold text-gray-800 mb-2 uppercase text-[10px] sm:text-xs tracking-wider">Description</h4>
-                <p class="text-gray-600 leading-relaxed text-sm">${item.description}</p>
+                <p class="text-gray-600 leading-relaxed text-sm sm:text-base">${item.description}</p>
               </div>
               <div class="mt-6 sm:mt-8">
                 <h4 class="font-bold text-gray-800 mb-3 uppercase text-[10px] sm:text-xs tracking-wider">Select Size <span id="size-warning" class="text-red-500 hidden ml-2 text-transform-none">*Please select a size</span></h4>
                 <div class="flex flex-wrap gap-2 sm:gap-3">${sizeHtml}</div>
               </div>
               <div class="mt-8 sm:mt-auto pt-6 sm:pt-10">
-                <button onclick="handleAddDetailToCart('${catKey}', ${index})" class="w-full bg-green-500 text-white font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl hover:bg-green-600 transition shadow-lg text-base sm:text-lg flex justify-center items-center gap-2"><i data-lucide="shopping-bag" class="w-5 h-5 sm:w-6 sm:h-6"></i> Add to Bag</button>
+                <button onclick="handleAddDetailToCart('${catKey}', ${index})" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl sm:rounded-2xl hover:bg-green-600 transition shadow-lg text-base sm:text-lg flex justify-center items-center gap-2"><i data-lucide="shopping-bag" class="w-5 h-5 sm:w-6 sm:h-6"></i> Add to Bag</button>
               </div>
             </div>
           </div>
         `;
+        showView('view-product');
         lucide.createIcons();
     }
 
@@ -687,7 +731,7 @@
             cartItems.push({ name: item.name, size: window.currentSelectedSize, price: parseFloat(item.price), img: item.img, quantity: 1 });
         }
         
-        updateCartBadge();
+        saveCart(); // Saves to local storage and updates badge
         showCartNotification(`${item.name} (${window.currentSelectedSize}) added!`);
     }
 
@@ -698,14 +742,17 @@
 
     function removeFromCart(index) {
       cartItems.splice(index, 1);
-      updateCartBadge();
+      saveCart();
       renderCartItems();
     }
 
     function updateQuantity(index, change) {
       cartItems[index].quantity += change;
-      if (cartItems[index].quantity < 1) removeFromCart(index);
-      else renderCartItems();
+      if (cartItems[index].quantity < 1) {
+          cartItems.splice(index, 1);
+      }
+      saveCart();
+      renderCartItems();
     }
 
     function updateCartBadge() {
@@ -794,34 +841,49 @@
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
       
       cartItems = [];
-      updateCartBadge();
+      saveCart(); // Clear the storage after checkout
       closeModal();
       showCartNotification('Order sent to WhatsApp! 🎉');
     }
 
     function handleSearch() {
       const q = document.getElementById('search-input').value.toLowerCase().trim();
-      if (!q) return;
+      if (!q) {
+          showView('view-home');
+          return;
+      }
       const res = allProducts.filter(i => i.name.toLowerCase().includes(q));
       
-      document.getElementById('modal-title').textContent = `Search: "${q}"`;
+      let html = `
+        <div class="flex items-center gap-2 mb-6 animate-in">
+          <button onclick="showView('view-home')" class="text-sm font-bold text-gray-500 hover:text-green-600 transition flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Home</button>
+          <span class="text-gray-300">/</span>
+          <h2 class="font-display text-2xl md:text-3xl font-bold text-gray-800">Search: "${q}"</h2>
+        </div>
+      `;
+
       if (res.length === 0) {
-        document.getElementById('modal-body').innerHTML = '<div class="text-center py-16"><p class="text-gray-400 text-lg">No products found.</p></div>';
+        html += '<div class="text-center py-16"><p class="text-gray-400 text-lg">No products found.</p></div>';
       } else {
-        let html = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">';
+        html += '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-in delay-1">';
         res.forEach(item => {
           html += `
-            <div class="rounded-2xl overflow-hidden group shadow-sm hover:shadow-xl transition cursor-pointer" style="background:#faf8f5; border:1px solid #eee;" onclick="openProductDetail('${item.categoryKey}', ${item.index})">
-              <div class="h-48 overflow-hidden"><img src="${item.img}" class="w-full h-full object-cover img-zoom"></div>
-              <div class="p-4 sm:p-5">
-                <h4 class="font-bold text-gray-800 text-sm sm:text-base">${item.name}</h4>
+            <div class="rounded-2xl overflow-hidden group shadow-sm hover:shadow-xl transition cursor-pointer flex flex-col" style="background:#faf8f5; border:1px solid #eee;" onclick="openProduct('${item.categoryKey}', ${item.index})">
+              <div class="h-48 overflow-hidden w-full"><img src="${item.img}" class="w-full h-full object-cover img-zoom"></div>
+              <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+                <h4 class="font-display font-bold text-gray-800 text-sm sm:text-base line-clamp-2">${item.name}</h4>
                 <p class="text-green-600 font-bold mt-1 sm:mt-2 text-sm sm:text-base">₵${parseFloat(item.price).toFixed(2)}</p>
               </div>
             </div>`;
         });
-        document.getElementById('modal-body').innerHTML = html + '</div>';
+        html += '</div>';
       }
-      document.getElementById('modal-overlay').classList.add('active');
+      
+      document.getElementById('view-category').innerHTML = html;
+      showView('view-category');
+      lucide.createIcons();
+      
+      if(window.innerWidth < 1024) document.getElementById('sidebar').classList.add('closed');
     }
 
     function toggleSearchBar() {
@@ -900,7 +962,7 @@
         return;
       }
       allProducts.forEach(item => {
-        const catTitle = categoriesData[item.categoryKey].title;
+        const catTitle = categoriesData[item.categoryKey] ? categoriesData[item.categoryKey].title : 'Unknown';
         html += `
           <tr class="hover:bg-gray-50 transition border-b border-gray-100">
             <td class="p-2 md:p-4"><img src="${item.img}" class="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover border border-gray-200"></td>
