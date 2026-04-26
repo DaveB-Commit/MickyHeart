@@ -56,7 +56,7 @@
     
    <aside id="sidebar" class="sidebar fixed top-0 left-0 h-full z-40 flex flex-col" style="background:#22c55e; color:#ffffff;">
     <div class="p-6 flex items-center justify-between" style="border-bottom:1px solid rgba(255,255,255,0.2);">
-     <div class="flex items-center gap-3 cursor-pointer" onclick="showView('view-home')">
+     <div class="flex items-center gap-3 cursor-pointer" onclick="showView('view-home', { type: 'home' })">
       <img src="logo.png" alt="Logo" class="w-10 h-10 rounded-full bg-white object-cover border-2 border-white shadow-sm" onerror="this.src='https://img.icons8.com/color/96/000000/hearts.png'">
       <div class="flex flex-col justify-center">
        <div class="font-display text-xl font-bold leading-none" style="color:#ffffff;">MickyHeart</div>
@@ -114,7 +114,7 @@
       
       <div class="flex items-center gap-3">
        <button id="open-sidebar" class="p-2 -ml-2 rounded-lg hover:bg-black/5 transition hidden"><i data-lucide="menu" style="width:22px;height:22px;"></i></button>
-       <div class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition" onclick="showView('view-home')">
+       <div class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition" onclick="showView('view-home', { type: 'home' })">
         <img src="logo.png" alt="Logo" class="w-7 h-7 object-cover rounded-full shadow-sm" onerror="this.src='https://img.icons8.com/color/96/000000/hearts.png'">
         <div id="topbar-brand" class="font-display text-xl font-semibold flex items-baseline gap-1.5" style="color:#22c55e;">
           MickyHeart <span class="font-brush text-2xl font-normal" style="color:#16a34a;">Collection</span>
@@ -178,7 +178,7 @@
        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
         
         <div class="flex-1 w-full text-center md:text-left flex flex-col items-center md:items-start">
-         <div class="flex items-center gap-2 mb-2 cursor-pointer hover:opacity-80 transition" onclick="showView('view-home')">
+         <div class="flex items-center gap-2 mb-2 cursor-pointer hover:opacity-80 transition" onclick="showView('view-home', { type: 'home' })">
            <img src="logo.png" alt="Logo" class="w-6 h-6 object-cover rounded-full" onerror="this.src='https://img.icons8.com/color/96/000000/hearts.png'">
            <div class="font-display text-2xl font-bold text-green-600 flex items-baseline gap-1.5">MickyHeart <span class="font-brush text-3xl font-normal text-green-500">Collection</span></div>
          </div>
@@ -546,6 +546,9 @@
         // Init cart badge on load
         updateCartBadge();
         
+        // Initialize Base Browser History
+        history.replaceState({ view: 'view-home', type: 'home' }, "", "#home");
+
         // STEP 1: Fast Load from Local IndexedDB (Offline-First)
         const localData = await loadFromIndexedDB();
         if (localData) {
@@ -606,25 +609,73 @@
 
 
     // ==========================================
-    // UI LOGIC (SPA NAVIGATION)
+    // UI LOGIC (SPA NAVIGATION & HISTORY)
     // ==========================================
+    
+    let currentActiveState = { view: 'view-home', type: 'home' };
 
-    function showView(viewId) {
+    function showView(viewId, stateData = null, addToHistory = true) {
         document.getElementById('view-home').classList.add('hidden');
         document.getElementById('view-category').classList.add('hidden');
         document.getElementById('view-product').classList.add('hidden');
         
         document.getElementById(viewId).classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        const newState = { view: viewId, ...(stateData || {}) };
+        currentActiveState = newState;
+
+        if (addToHistory) {
+            history.pushState(newState, "", "#" + viewId.replace("view-", ""));
+        }
     }
 
-    function openCategory(key) {
+    // Intercept back button hardware clicks
+    window.addEventListener('popstate', (e) => {
+        const modalOverlay = document.getElementById('modal-overlay');
+        const adminModal = document.getElementById('admin-modal');
+        
+        let modalWasOpen = false;
+        
+        // If a modal is open, just close it. Do NOT navigate back a page.
+        if (modalOverlay && modalOverlay.classList.contains('active')) {
+            modalOverlay.classList.remove('active');
+            modalWasOpen = true;
+        }
+        if (adminModal && adminModal.classList.contains('active')) {
+            adminModal.classList.remove('active');
+            modalWasOpen = true;
+        }
+
+        if (modalWasOpen) {
+            // Restore the popped state secretly so the page stays on the current view
+            history.pushState(currentActiveState, "", "#" + currentActiveState.view.replace("view-", ""));
+            return;
+        }
+
+        // If no modal was open, navigate smoothly to the previous view
+        if (e.state) {
+            currentActiveState = e.state; 
+            if (e.state.type === 'category') {
+                openCategory(e.state.key, false);
+            } else if (e.state.type === 'product') {
+                openProduct(e.state.catKey, e.state.index, false);
+            } else {
+                showView('view-home', { type: 'home' }, false);
+            }
+        } else {
+            showView('view-home', { type: 'home' }, false);
+        }
+    });
+
+
+    function openCategory(key, addToHistory = true) {
       const data = categoriesData[key];
       if (!data || !data.items || data.items.length === 0) return alert("No products here yet!");
       
       let html = `
         <div class="flex items-center gap-2 mb-6 animate-in">
-          <button onclick="showView('view-home')" class="text-sm font-bold text-gray-500 hover:text-green-600 transition flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Home</button>
+          <button onclick="history.back()" class="text-sm font-bold text-gray-500 hover:text-green-600 transition flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Home</button>
           <span class="text-gray-300">/</span>
           <h2 class="font-display text-2xl md:text-3xl font-bold text-gray-800">${data.title}</h2>
         </div>
@@ -647,14 +698,14 @@
       html += '</div>';
       
       document.getElementById('view-category').innerHTML = html;
-      showView('view-category');
+      showView('view-category', { type: 'category', key: key }, addToHistory);
       lucide.createIcons();
 
       // Auto close sidebar on mobile
       if(window.innerWidth < 1024) document.getElementById('sidebar').classList.add('closed');
     }
 
-    function openProduct(catKey, index) {
+    function openProduct(catKey, index, addToHistory = true) {
         const item = categoriesData[catKey].items[index];
         window.currentSelectedSize = null;
 
@@ -669,7 +720,7 @@
 
         document.getElementById('view-product').innerHTML = `
           <div class="flex items-center gap-2 mb-6 animate-in">
-             <button onclick="openCategory('${catKey}')" class="text-sm font-bold text-gray-500 hover:text-green-600 transition flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to ${categoriesData[catKey].title}</button>
+             <button onclick="history.back()" class="text-sm font-bold text-gray-500 hover:text-green-600 transition flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Back to ${categoriesData[catKey].title}</button>
           </div>
           <div class="flex flex-col md:flex-row gap-6 sm:gap-10 animate-in delay-1">
             <div class="w-full md:w-1/2 flex flex-col gap-4">
@@ -695,7 +746,7 @@
             </div>
           </div>
         `;
-        showView('view-product');
+        showView('view-product', { type: 'product', catKey: catKey, index: index }, addToHistory);
         lucide.createIcons();
     }
 
@@ -849,14 +900,14 @@
     function handleSearch() {
       const q = document.getElementById('search-input').value.toLowerCase().trim();
       if (!q) {
-          showView('view-home');
+          showView('view-home', { type: 'home' }, false);
           return;
       }
       const res = allProducts.filter(i => i.name.toLowerCase().includes(q));
       
       let html = `
         <div class="flex items-center gap-2 mb-6 animate-in">
-          <button onclick="showView('view-home')" class="text-sm font-bold text-gray-500 hover:text-green-600 transition flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Home</button>
+          <button onclick="history.back()" class="text-sm font-bold text-gray-500 hover:text-green-600 transition flex items-center gap-1"><i data-lucide="arrow-left" class="w-4 h-4"></i> Home</button>
           <span class="text-gray-300">/</span>
           <h2 class="font-display text-2xl md:text-3xl font-bold text-gray-800">Search: "${q}"</h2>
         </div>
@@ -880,7 +931,9 @@
       }
       
       document.getElementById('view-category').innerHTML = html;
-      showView('view-category');
+      
+      // Pass false to addToHistory so live search keystrokes don't spam the back button
+      showView('view-category', { type: 'search', query: q }, false);
       lucide.createIcons();
       
       if(window.innerWidth < 1024) document.getElementById('sidebar').classList.add('closed');
